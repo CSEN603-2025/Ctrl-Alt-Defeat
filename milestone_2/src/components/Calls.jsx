@@ -46,36 +46,40 @@ export const CallNotification = ({ caller, onAccept, onReject }) => {
   }, [onReject]);
   
   return (
-    <div className="bg-gray-800 rounded-2xl shadow-xl p-4 max-w-sm w-full flex items-center justify-between">
-      <div className="flex items-center gap-4">
-        <div className="relative">
-          <img 
-            src={caller.profileImage || "/images/student.png"} 
-            alt={caller.name}
-            className="w-14 h-14 rounded-full object-cover"
-          />
+    <div className="bg-apple-gray-50 backdrop-blur-md rounded-lg shadow-md max-w-sm w-full border border-metallica-blue-200">
+      {/* Caller info and buttons in a row */}
+      <div className="flex items-center justify-between p-4">
+        <div className="flex items-center">
+          <div className="relative w-12 h-12 overflow-hidden rounded-full border-2 border-white shadow-sm mr-3">
+            <img 
+              src={caller.profileImage || "/images/student.png"} 
+              alt={caller.name}
+              className="w-full h-full object-cover"
+            />
+          </div>
+          <div>
+            <h4 className="font-semibold text-metallica-blue-800 text-lg">{caller.name}</h4>
+            <p className="text-metallica-blue-600 text-xs">Calling...</p>
+          </div>
         </div>
-        <div>
-          <h4 className="font-bold text-white text-xl">{caller.name}</h4>
-          <p className="text-gray-300">is calling</p>
+        
+        {/* Call actions */}
+        <div className="flex gap-3">
+          <button 
+            onClick={onReject}
+            className="bg-red-500 hover:bg-red-600 w-10 h-10 rounded-full flex items-center justify-center transition-colors shadow-md"
+            aria-label="Decline call"
+          >
+            <FontAwesomeIcon icon={faPhoneSlash} className="text-white text-sm rotate-135" />
+          </button>
+          <button 
+            onClick={onAccept}
+            className="bg-green-500 hover:bg-green-600 w-10 h-10 rounded-full flex items-center justify-center transition-colors shadow-md"
+            aria-label="Answer call"
+          >
+            <FontAwesomeIcon icon={faPhone} className="text-white text-sm" />
+          </button>
         </div>
-      </div>
-      
-      <div className="flex gap-3">
-        <button 
-          onClick={onReject}
-          className="bg-red-600 hover:bg-red-700 w-12 h-12 rounded-full flex items-center justify-center transition-colors"
-          aria-label="Decline call"
-        >
-          <FontAwesomeIcon icon={faPhoneSlash} className="text-white" />
-        </button>
-        <button 
-          onClick={onAccept}
-          className="bg-green-500 hover:bg-green-600 w-12 h-12 rounded-full flex items-center justify-center transition-colors"
-          aria-label="Answer call"
-        >
-          <FontAwesomeIcon icon={faPhone} className="text-white" />
-        </button>
       </div>
     </div>
   );
