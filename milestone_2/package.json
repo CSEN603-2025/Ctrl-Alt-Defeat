@@ -17,6 +17,7 @@
     "@radix-ui/react-slot": "^1.2.2",
     "@types/react-datepicker": "^6.2.0",
     "@types/react-day-picker": "^5.2.1",
+    "@zegocloud/zego-uikit-prebuilt": "^2.14.3-beta",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
     "date-fns": "^3.6.0",
@@ -33,6 +34,8 @@
     "react-toastify": "^11.0.5",
     "react-tooltip": "^5.28.1",
     "redux": "^5.0.1",
+    "simple-peer": "^9.11.1",
+    "socket.io-client": "^4.8.1",
     "tailwind-merge": "^3.2.0",
     "tailwindcss-animate": "^1.0.7",
     "yup": "^1.6.1"
