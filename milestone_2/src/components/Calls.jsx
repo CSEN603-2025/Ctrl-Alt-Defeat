@@ -542,7 +542,22 @@ export const CallInterface = ({ isOpen, onClose, caller = {}, isOutgoing = false
                 {/* Chat messages */}
                 <div className="flex-grow p-4 space-y-4 overflow-y-auto" style={{ maxHeight: '50vh' }}>
                   {chatMessages.length === 0 ? (
-                    <p className="text-center text-metallica-blue-400 py-8">No messages yet. Start the conversation!</p>
+                    <div className="text-center py-8">
+                      <p className="text-center text-metallica-blue-400 mb-4">No messages yet. Start the conversation!</p>
+                      
+                      {/* Simulate Person Left Button */}
+                      <button
+                        onClick={() => {
+                          document.dispatchEvent(new CustomEvent('participant-left-call'));
+                          handleEndCall(true);
+                        }}
+                        className="mt-4 bg-red-500 hover:bg-red-600 text-white py-2 px-4 rounded-lg font-medium flex items-center gap-2 mx-auto transition-colors"
+                        title="Test notification when other person leaves the call"
+                      >
+                        <FontAwesomeIcon icon={faPhoneSlash} className="text-white" />
+                        <span>Simulate Person Left</span>
+                      </button>
+                    </div>
                   ) : (
                     chatMessages.map(message => (
                       <div 
@@ -597,8 +612,21 @@ export const CallInterface = ({ isOpen, onClose, caller = {}, isOutgoing = false
                     onChange={(e) => setNoteContent(e.target.value)}
                     className="w-full h-full p-3 border border-metallica-blue-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-metallica-blue-300 focus:border-transparent resize-none"
                     placeholder="Take notes during your call..."
-                    style={{ minHeight: '50vh' }}
+                    style={{ minHeight: '40vh' }}
                   ></textarea>
+                  
+                  {/* Simulate Person Left Button */}
+                  <button
+                    onClick={() => {
+                      document.dispatchEvent(new CustomEvent('participant-left-call'));
+                      handleEndCall(true);
+                    }}
+                    className="mt-4 bg-red-500 hover:bg-red-600 text-white py-2 px-4 rounded-lg font-medium flex items-center gap-2 mx-auto transition-colors"
+                    title="Test notification when other person leaves the call"
+                  >
+                    <FontAwesomeIcon icon={faPhoneSlash} className="text-white" />
+                    <span>Simulate Person Left</span>
+                  </button>
                 </div>
                 <div className="p-4 border-t border-metallica-blue-100 flex justify-end">
                   <button
@@ -613,6 +641,23 @@ export const CallInterface = ({ isOpen, onClose, caller = {}, isOutgoing = false
                 </div>
               </div>
             )}
+          </div>
+        )}
+        
+        {/* Add Simulate Person Left button when no panels are open */}
+        {!showChat && !showNotes && (
+          <div className="absolute top-4 right-4">
+            <button
+              onClick={() => {
+                document.dispatchEvent(new CustomEvent('participant-left-call'));
+                handleEndCall(true);
+              }}
+              className="bg-red-50 hover:bg-red-100 text-red-600 py-1 px-3 rounded-lg text-sm font-medium flex items-center gap-1 transition-colors border border-red-200"
+              title="Test notification when other person leaves the call"
+            >
+              <FontAwesomeIcon icon={faPhoneSlash} className="text-red-600 text-xs" />
+              <span>Simulate Person Left</span>
+            </button>
           </div>
         )}
       </div>

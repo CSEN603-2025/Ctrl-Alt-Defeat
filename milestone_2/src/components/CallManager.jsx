@@ -66,6 +66,14 @@ const CallManager = ({ contacts = [] }) => {
     receiveCall(caller);
     setShowSimulateOptions(false);
   };
+  
+  // Function to simulate a participant leaving the call
+  const handleSimulateParticipantLeft = () => {
+    console.log('Simulating participant left call');
+    // Dispatch an event that will be handled by the Calls component
+    document.dispatchEvent(new CustomEvent('participant-left-call'));
+    setShowSimulateOptions(false);
+  };
 
   return (
     <>
@@ -95,6 +103,13 @@ const CallManager = ({ contacts = [] }) => {
               >
                 <FontAwesomeIcon icon={faPhoneVolume} />
                 <span>Simulate Incoming Call</span>
+              </button>
+              <button
+                onClick={handleSimulateParticipantLeft}
+                className="w-full py-2 px-3 bg-red-500 hover:bg-red-600 text-white rounded flex items-center justify-center gap-2 mt-2"
+              >
+                <FontAwesomeIcon icon={faPhoneSlash} />
+                <span>Simulate Participant Left</span>
               </button>
             </div>
           </div>
