@@ -2,16 +2,16 @@
 
 import { useState, useEffect } from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faPhone } from '@fortawesome/free-solid-svg-icons';
+import { faPhone, faPhoneVolume, faBug, faPhoneSlash } from '@fortawesome/free-solid-svg-icons';
 import { useCallFunctions } from './Calls';
-import { ToastContainer } from 'react-toastify';
-import 'react-toastify/dist/ReactToastify.css';
 import Image from 'next/image';
+import { MOCK_USERS } from '../../constants/mockData';
 
 const CallManager = ({ contacts = [] }) => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [currentUser, setCurrentUser] = useState(null);
-  const { initiateCall } = useCallFunctions();
+  const { initiateCall, receiveCall } = useCallFunctions();
+  const [showSimulateOptions, setShowSimulateOptions] = useState(false);
 
   useEffect(() => {
     // Get current user from session storage
@@ -27,10 +27,62 @@ const CallManager = ({ contacts = [] }) => {
     initiateCall(contact);
     setIsMenuOpen(false);
   };
+  
+  // Function to simulate receiving a call
+  const handleSimulateIncomingCall = () => {
+    // Determine who should be calling based on current user role
+    let caller = null;
+    
+    if (currentUser?.role === 'student') {
+      // If user is a student, simulate call from SCAD admin
+      caller = MOCK_USERS.scad;
+    } else {
+      // If user is SCAD or other, simulate call from a random student
+      const students = MOCK_USERS.students || [];
+      if (students.length > 0) {
+        const randomIndex = Math.floor(Math.random() * students.length);
+        caller = students[randomIndex];
+      }
+    }
+    
+    if (caller) {
+      receiveCall(caller);
+      setShowSimulateOptions(false);
+    }
+  };
 
   return (
     <>
       <div className="fixed bottom-6 right-6 z-40">
+        {/* Debug button for simulating calls */}
+        <button 
+          onClick={() => setShowSimulateOptions(!showSimulateOptions)}
+          className={`w-10 h-10 rounded-full shadow-lg transition-all duration-300 flex items-center justify-center bg-gray-600 hover:bg-gray-700 mb-2`}
+        >
+          <FontAwesomeIcon 
+            icon={faBug} 
+            className="text-white text-sm" 
+          />
+        </button>
+        
+        {/* Simulation options */}
+        {showSimulateOptions && (
+          <div className="absolute bottom-16 right-0 mb-2 bg-white rounded-lg shadow-xl w-64 overflow-hidden">
+            <div className="p-3 bg-gray-100 text-gray-800 font-medium">
+              Debug Options
+            </div>
+            <div className="p-3">
+              <button
+                onClick={handleSimulateIncomingCall}
+                className="w-full py-2 px-3 bg-yellow-500 hover:bg-yellow-600 text-white rounded flex items-center justify-center gap-2"
+              >
+                <FontAwesomeIcon icon={faPhoneVolume} />
+                <span>Simulate Incoming Call</span>
+              </button>
+            </div>
+          </div>
+        )}
+        
         {/* Call button */}
         <button 
           onClick={() => setIsMenuOpen(!isMenuOpen)}
@@ -81,18 +133,6 @@ const CallManager = ({ contacts = [] }) => {
           </div>
         )}
       </div>
-
-      <ToastContainer
-        position="top-right"
-        autoClose={5000}
-        hideProgressBar={false}
-        newestOnTop
-        closeOnClick
-        rtl={false}
-        pauseOnFocusLoss
-        draggable
-        pauseOnHover
-      />
     </>
   );
 };

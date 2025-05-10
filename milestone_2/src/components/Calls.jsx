@@ -43,41 +43,35 @@ export const CallNotification = ({ caller, onAccept, onReject }) => {
   }, [onReject]);
   
   return (
-    <div className="bg-white rounded-lg shadow-xl p-4 max-w-sm w-full border-l-4 border-metallica-blue-500">
-      <div className="flex justify-between items-center mb-3">
-        <h3 className="text-xl font-bold text-metallica-blue-700">Incoming Call</h3>
-        <span className="text-red-500 font-medium">{timeLeft}s</span>
-      </div>
-      
-      <div className="flex items-center gap-4 mb-4">
+    <div className="bg-gray-800 rounded-2xl shadow-xl p-4 max-w-sm w-full flex items-center justify-between">
+      <div className="flex items-center gap-4">
         <div className="relative">
-          <div className="absolute inset-0 bg-green-400 rounded-full animate-ping opacity-75"></div>
           <img 
             src={caller.profileImage || "/images/student.png"} 
             alt={caller.name}
-            className="w-16 h-16 rounded-full object-cover border-2 border-metallica-blue-300 z-10 relative"
+            className="w-14 h-14 rounded-full object-cover"
           />
         </div>
         <div>
-          <h4 className="font-bold text-gray-800 text-lg">{caller.name}</h4>
-          <p className="text-gray-600">is calling you...</p>
+          <h4 className="font-bold text-white text-xl">{caller.name}</h4>
+          <p className="text-gray-300">is calling</p>
         </div>
       </div>
       
-      <div className="grid grid-cols-2 gap-3">
+      <div className="flex gap-3">
         <button 
           onClick={onReject}
-          className="bg-red-500 hover:bg-red-600 text-white py-3 rounded-full flex items-center justify-center gap-2 font-medium transition-colors"
+          className="bg-red-600 hover:bg-red-700 w-12 h-12 rounded-full flex items-center justify-center transition-colors"
+          aria-label="Decline call"
         >
-          <FontAwesomeIcon icon={faPhoneSlash} />
-          <span>Decline</span>
+          <FontAwesomeIcon icon={faPhoneSlash} className="text-white" />
         </button>
         <button 
           onClick={onAccept}
-          className="bg-green-500 hover:bg-green-600 text-white py-3 rounded-full flex items-center justify-center gap-2 font-medium transition-colors"
+          className="bg-green-500 hover:bg-green-600 w-12 h-12 rounded-full flex items-center justify-center transition-colors"
+          aria-label="Answer call"
         >
-          <FontAwesomeIcon icon={faPhone} />
-          <span>Accept</span>
+          <FontAwesomeIcon icon={faPhone} className="text-white" />
         </button>
       </div>
     </div>
@@ -87,12 +81,12 @@ export const CallNotification = ({ caller, onAccept, onReject }) => {
 // Main Call Interface Component
 export const CallInterface = ({ isOpen, onClose, caller = {}, isOutgoing = false }) => {
   const [isMuted, setIsMuted] = useState(false);
-  const [isVideoEnabled, setIsVideoEnabled] = useState(true);
+  const [isVideoEnabled, setIsVideoEnabled] = useState(false); // Changed to false to have camera off by default
   const [isScreenSharing, setIsScreenSharing] = useState(false);
   const [callStatus, setCallStatus] = useState(isOutgoing ? 'calling' : 'connected');
   const [callDuration, setCallDuration] = useState(0);
   const [showRemoteVideo, setShowRemoteVideo] = useState(!isOutgoing);
-  const [callAccepted, setCallAccepted] = useState(false);
+  const [callAccepted, setCallAccepted] = useState(!isOutgoing);
   
   const timerRef = useRef(null);
   const localVideoRef = useRef(null);
@@ -104,57 +98,61 @@ export const CallInterface = ({ isOpen, onClose, caller = {}, isOutgoing = false
   
   // Handle outgoing call simulation
   useEffect(() => {
-    // If it's an outgoing call, wait 3 seconds then "connect"
+    // If it's an outgoing call, wait 5 seconds then "connect"
     if (isOutgoing && callStatus === 'calling') {
-      const timer = setTimeout(() => {
-        setCallStatus('connected');
-        setShowRemoteVideo(true);
-        setCallAccepted(true);
-        
-        // Show notification that call was accepted
-        toast.success(`${caller?.name || 'User'} accepted your call`, {
-          position: "top-right",
-          autoClose: 3000
-        });
+      // After 3 seconds, show connecting status
+      const connectingTimer = setTimeout(() => {
+        setCallStatus('connecting');
       }, 3000);
       
-      return () => clearTimeout(timer);
+      // After 5 seconds total, show connected status
+      const connectedTimer = setTimeout(() => {
+        setCallStatus('connected');
+        setShowRemoteVideo(true);
+        
+        // Delay setting callAccepted to create a visible transition
+        setTimeout(() => {
+          setCallAccepted(true);
+        }, 500);
+      }, 5000);
+      
+      return () => {
+        clearTimeout(connectingTimer);
+        clearTimeout(connectedTimer);
+      };
     }
     
     return () => {};
-  }, [isOutgoing, callStatus, caller?.name]); // Use optional chaining to prevent errors
+  }, [isOutgoing, callStatus, caller?.name]);
   
   // Setup media stream and timer when call is connected
   useEffect(() => {
+    // Always set up local video stream immediately
+    if (isVideoEnabled && navigator.mediaDevices) {
+      navigator.mediaDevices.getUserMedia({ video: true, audio: true })
+        .then(stream => {
+          // Set local video stream
+          if (localVideoRef.current) {
+            localVideoRef.current.srcObject = stream;
+          }
+          
+          // For demo purposes, use the same stream for remote video
+          // but only after call is accepted
+          if (remoteVideoRef.current && callAccepted) {
+            remoteVideoRef.current.srcObject = stream;
+          }
+        })
+        .catch(error => {
+          console.error("Error accessing camera/microphone:", error);
+          setIsVideoEnabled(false);
+        });
+    }
+    
+    // Start call duration timer only when connected
     if (callStatus === 'connected') {
-      // Start call duration timer
       timerRef.current = setInterval(() => {
         setCallDuration(prev => prev + 1);
       }, 1000);
-      
-      // Setup video streams (using getUserMedia API)
-      if (isVideoEnabled && navigator.mediaDevices) {
-        navigator.mediaDevices.getUserMedia({ video: true, audio: true })
-          .then(stream => {
-            // Set local video stream
-            if (localVideoRef.current) {
-              localVideoRef.current.srcObject = stream;
-            }
-            
-            // For demo purposes, use the same stream for remote video
-            if (remoteVideoRef.current) {
-              remoteVideoRef.current.srcObject = stream;
-            }
-          })
-          .catch(error => {
-            console.error("Error accessing camera/microphone:", error);
-            setIsVideoEnabled(false);
-            toast.error("Could not access camera or microphone", {
-              position: "top-right",
-              autoClose: 3000
-            });
-          });
-      }
     }
     
     // Cleanup function
@@ -168,7 +166,7 @@ export const CallInterface = ({ isOpen, onClose, caller = {}, isOutgoing = false
         localVideoRef.current.srcObject.getTracks().forEach(track => track.stop());
       }
     };
-  }, [callStatus, isVideoEnabled]);
+  }, [callStatus, isVideoEnabled, callAccepted]);
   
   // Format call duration as MM:SS
   const formatDuration = (seconds) => {
@@ -236,10 +234,6 @@ export const CallInterface = ({ isOpen, onClose, caller = {}, isOutgoing = false
         })
         .catch(error => {
           console.error("Error sharing screen:", error);
-          toast.error("Could not share screen", {
-            position: "top-right",
-            autoClose: 3000
-          });
         });
     } else {
       // Stop screen sharing
@@ -252,7 +246,7 @@ export const CallInterface = ({ isOpen, onClose, caller = {}, isOutgoing = false
           navigator.mediaDevices.getUserMedia({ video: true, audio: !isMuted })
             .then(stream => {
               if (localVideoRef.current) localVideoRef.current.srcObject = stream;
-              if (remoteVideoRef.current) remoteVideoRef.current.srcObject = stream;
+              if (remoteVideoRef.current) localVideoRef.current.srcObject = stream;
             });
         }
       }
@@ -261,53 +255,46 @@ export const CallInterface = ({ isOpen, onClose, caller = {}, isOutgoing = false
   };
   
   // End call
-  const handleEndCall = () => {
+  const handleEndCall = (participantLeft = false) => {
     // Stop all media tracks
     if (localVideoRef.current?.srcObject) {
       localVideoRef.current.srcObject.getTracks().forEach(track => track.stop());
     }
     
-    // Show end call notification
-    toast.info(`Call ended with ${caller.name || 'User'}`, {
-      position: "top-right",
-      autoClose: 3000
-    });
-    
-    // Close call interface
-    onClose();
-    
-    // Reset global call state
-    globalCallState.activeCall = null;
-    globalCallState.showCallInterface = false;
-    globalCallState.isOutgoingCall = false;
+    // Call onClose WITHOUT passing the participantLeft parameter
+    // This ensures the parent's handleEndCall always treats it as you ending the call
+    onClose(false);
   };
   
   // If the call is not open, don't render anything
   if (!isOpen) return null;
   
   return (
-    <div className="fixed inset-0 flex items-center justify-center z-50 bg-black bg-opacity-90">
-      <div className="w-full max-w-5xl mx-4 bg-metallica-blue-900 rounded-xl overflow-hidden shadow-2xl">
+    <div className="fixed inset-0 flex items-center justify-center z-50 bg-[var(--metallica-blue-50)] bg-opacity-40 backdrop-blur-sm">
+      <div className="w-full max-w-3xl bg-white overflow-hidden shadow-lg relative rounded-2xl border border-[var(--metallica-blue-200)]">
         {/* Call header */}
-        <div className="bg-metallica-blue-800 p-4 flex justify-between items-center">
+        <div className="bg-[var(--metallica-blue-50)] p-4 flex justify-between items-center">
           <div>
-            <h3 className="font-semibold text-xl text-white">
-              {isOutgoing ? `Calling ${caller.name || 'User'}...` : `Call with ${caller.name || 'User'}`}
+            <h3 className="font-semibold text-xl text-[var(--metallica-blue-800)]">
+              {isOutgoing && !callAccepted ? `Calling ${caller.name || 'User'}...` : `Call with ${caller.name || 'User'}`}
             </h3>
-            <p className="text-sm text-metallica-blue-200">
+            <p className="text-sm text-[var(--metallica-blue-600)]">
               {callStatus === 'connected' 
                 ? `Connected • ${formatDuration(callDuration)}` 
+                : callStatus === 'connecting' 
+                ? 'Connecting...' 
                 : 'Calling...'}
             </p>
           </div>
+          {/* Removed top end call button since we'll have it in the controls below */}
         </div>
         
         {/* Call content area */}
-        <div className="p-6">
-          {isOutgoing && !showRemoteVideo ? (
-            // Initial outgoing call view - only shows caller
-            <div className="w-full">
-              <div className="w-full h-[60vh] bg-metallica-blue-700 rounded-lg overflow-hidden relative">
+        <div className="w-full relative">
+          {isOutgoing && !callAccepted ? (
+            // Initial outgoing call view - only shows caller's video centered with "You" label
+            <div className="w-full flex flex-col items-center justify-center p-4 bg-white">
+              <div className="w-full h-[50vh] bg-[var(--metallica-blue-50)] rounded-lg overflow-hidden relative">
                 {isVideoEnabled ? (
                   <video 
                     ref={localVideoRef} 
@@ -318,21 +305,21 @@ export const CallInterface = ({ isOpen, onClose, caller = {}, isOutgoing = false
                   />
                 ) : (
                   <div className="w-full h-full flex items-center justify-center flex-col">
-                    <FontAwesomeIcon icon={faUserCircle} className="text-metallica-blue-300 text-8xl mb-4" />
-                    <p className="text-white text-xl">Camera is off</p>
+                    <FontAwesomeIcon icon={faUserCircle} className="text-[var(--metallica-blue-300)] text-7xl mb-3" />
+                    <p className="text-[var(--metallica-blue-600)] text-lg">Camera is off</p>
                   </div>
                 )}
               </div>
-              <div className="mt-3 text-center text-white text-lg font-medium">
-                {currentUser.name || "You"}
+              <div className="mt-3 text-center text-[var(--metallica-blue-700)] text-lg font-medium">
+                You
               </div>
             </div>
           ) : (
-            // Connected call view - both participants
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              {/* Remote video */}
-              <div className="aspect-video bg-metallica-blue-700 rounded-lg overflow-hidden relative">
-                {isVideoEnabled ? (
+            // Connected call view with main video display
+            <div className="relative w-full h-full">
+              {/* Main video (center) */}
+              <div className={`w-full h-[60vh] rounded-lg overflow-hidden bg-[var(--metallica-blue-50)] ${showRemoteVideo ? 'animate-fadeIn' : 'opacity-0'}`}>
+                {showRemoteVideo && isVideoEnabled ? (
                   <video 
                     ref={remoteVideoRef} 
                     autoPlay 
@@ -341,22 +328,28 @@ export const CallInterface = ({ isOpen, onClose, caller = {}, isOutgoing = false
                   />
                 ) : (
                   <div className="w-full h-full flex items-center justify-center flex-col">
-                    <FontAwesomeIcon icon={faUserCircle} className="text-metallica-blue-300 text-8xl mb-4" />
-                    <p className="text-white text-xl">Camera is off</p>
+                    <FontAwesomeIcon icon={faUserCircle} className="text-[var(--metallica-blue-300)] text-7xl mb-3" />
+                    <p className="text-[var(--metallica-blue-600)] text-lg">Camera is off</p>
                   </div>
                 )}
+                
+                {/* Remote user name label */}
+                <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 text-center">
+                  <div className="bg-white bg-opacity-80 px-4 py-2 rounded-full text-[var(--metallica-blue-800)] text-lg font-medium shadow-sm">
+                    {caller.name || "Caller"}
+                  </div>
+                </div>
+                
+                {/* Screen sharing indicator */}
                 {isScreenSharing && (
-                  <div className="absolute top-2 left-2 bg-metallica-blue-900 bg-opacity-60 px-3 py-1 rounded text-white text-sm">
+                  <div className="absolute top-16 left-4 bg-white bg-opacity-80 px-3 py-1 rounded-full text-[var(--metallica-blue-800)] text-sm shadow-sm">
                     Screen sharing
                   </div>
                 )}
-                <div className="mt-3 text-center text-white text-lg font-medium">
-                  {caller.name || "Caller"}
-                </div>
               </div>
               
-              {/* Local video */}
-              <div className="aspect-video bg-metallica-blue-700 rounded-lg overflow-hidden relative">
+              {/* Local video (PiP in bottom right corner) */}
+              <div className="absolute bottom-16 right-4 w-1/5 aspect-video bg-[var(--metallica-blue-50)] rounded-lg overflow-hidden border-2 border-white shadow-md">
                 {isVideoEnabled ? (
                   <video 
                     ref={localVideoRef} 
@@ -367,52 +360,74 @@ export const CallInterface = ({ isOpen, onClose, caller = {}, isOutgoing = false
                   />
                 ) : (
                   <div className="w-full h-full flex items-center justify-center flex-col">
-                    <FontAwesomeIcon icon={faUserCircle} className="text-metallica-blue-300 text-8xl mb-4" />
-                    <p className="text-white text-xl">Camera is off</p>
+                    <FontAwesomeIcon icon={faUserCircle} className="text-[var(--metallica-blue-300)] text-2xl mb-1" />
+                    <p className="text-[var(--metallica-blue-600)] text-xs">Camera is off</p>
                   </div>
                 )}
-                <div className="mt-3 text-center text-white text-lg font-medium">
-                  {currentUser.name || "You"}
+                
+                {/* Your name label */}
+                <div className="absolute bottom-1 left-1/2 transform -translate-x-1/2 bg-white bg-opacity-80 px-2 py-1 rounded-full text-[var(--metallica-blue-800)] text-xs shadow-sm">
+                  You
+                </div>
+              </div>
+              
+              {/* Volume slider on the left side */}
+              <div className="absolute left-4 top-1/2 transform -translate-y-1/2 bg-white bg-opacity-80 rounded-full py-4 px-1 shadow-sm">
+                <div className="h-32 flex flex-col items-center">
+                  <FontAwesomeIcon icon={isMuted ? faMicrophoneSlash : faMicrophone} className="text-[var(--metallica-blue-800)] text-sm mb-2" />
+                  <div className="bg-[var(--metallica-blue-100)] w-1 h-24 rounded-full relative">
+                    <div className="absolute bottom-0 w-1 bg-[var(--metallica-blue-500)] rounded-full" style={{ height: isMuted ? '0%' : '80%' }}></div>
+                  </div>
                 </div>
               </div>
             </div>
           )}
         </div>
         
-        {/* Call controls */}
-        <div className="bg-metallica-blue-800 p-4 flex justify-center gap-6">
+        {/* Call controls - circular buttons at the bottom */}
+        <div className="bg-white p-6 flex justify-center gap-5">
           <button 
             onClick={handleToggleMute} 
-            className={`w-12 h-12 rounded-full flex items-center justify-center transition-colors ${
-              isMuted ? 'bg-red-500' : 'bg-metallica-blue-500 hover:bg-metallica-blue-600'
+            className={`w-14 h-14 rounded-full flex items-center justify-center transition-all shadow-md ${
+              isMuted ? 'bg-red-500' : 'bg-[var(--metallica-blue-50)] hover:bg-[var(--metallica-blue-100)]'
             }`}
           >
-            <FontAwesomeIcon icon={isMuted ? faMicrophoneSlash : faMicrophone} className="text-white text-lg" />
+            <FontAwesomeIcon icon={isMuted ? faMicrophoneSlash : faMicrophone} className={`${isMuted ? 'text-white' : 'text-[var(--metallica-blue-700)]'} text-lg`} />
           </button>
           
           <button 
             onClick={handleToggleVideo} 
-            className={`w-12 h-12 rounded-full flex items-center justify-center transition-colors ${
-              !isVideoEnabled ? 'bg-red-500' : 'bg-metallica-blue-500 hover:bg-metallica-blue-600'
+            className={`w-14 h-14 rounded-full flex items-center justify-center transition-all shadow-md ${
+              !isVideoEnabled ? 'bg-red-500' : 'bg-[var(--metallica-blue-50)] hover:bg-[var(--metallica-blue-100)]'
             }`}
           >
-            <FontAwesomeIcon icon={isVideoEnabled ? faVideo : faVideoSlash} className="text-white text-lg" />
-          </button>
-          
-          <button 
-            onClick={handleToggleScreenShare}
-            className={`w-12 h-12 rounded-full flex items-center justify-center transition-colors ${
-              isScreenSharing ? 'bg-green-500' : 'bg-metallica-blue-500 hover:bg-metallica-blue-600'
-            }`}
-          >
-            <FontAwesomeIcon icon={faDesktop} className="text-white text-lg" />
+            <FontAwesomeIcon icon={isVideoEnabled ? faVideo : faVideoSlash} className={`${!isVideoEnabled ? 'text-white' : 'text-[var(--metallica-blue-700)]'} text-lg`} />
           </button>
           
           <button 
             onClick={handleEndCall}
-            className="w-12 h-12 bg-red-600 hover:bg-red-700 rounded-full flex items-center justify-center transition-colors"
+            className="w-16 h-16 bg-red-500 hover:bg-red-600 rounded-full flex items-center justify-center transition-all shadow-md"
           >
-            <FontAwesomeIcon icon={faPhoneSlash} className="text-white text-lg" />
+            <FontAwesomeIcon icon={faPhoneSlash} className="text-white text-xl" />
+          </button>
+          
+          <button 
+            onClick={handleToggleScreenShare}
+            className={`w-14 h-14 rounded-full flex items-center justify-center transition-all shadow-md ${
+              isScreenSharing ? 'bg-[var(--metallica-green-pop-color)]' : 'bg-[var(--metallica-blue-50)] hover:bg-[var(--metallica-blue-100)]'
+            }`}
+          >
+            <FontAwesomeIcon icon={faDesktop} className={`${isScreenSharing ? 'text-white' : 'text-[var(--metallica-blue-700)]'} text-lg`} />
+          </button>
+          
+          <button
+            className="w-14 h-14 bg-[var(--metallica-blue-50)] hover:bg-[var(--metallica-blue-100)] rounded-full flex items-center justify-center transition-all shadow-md"
+            onClick={() => {}}
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-[var(--metallica-blue-700)]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+            </svg>
           </button>
         </div>
       </div>
@@ -445,14 +460,24 @@ export default function Calls() {
       makeCall(recipient);
     };
     
+    const handleParticipantLeft = () => {
+      // Only handle this event if we're in an active call
+      if (showCallInterface && activeCall) {
+        // Call handleEndCall with participantLeft=true to show the proper notification
+        handleEndCall(true);
+      }
+    };
+    
     document.addEventListener('open-call', handleOpenCall);
     document.addEventListener('initiate-call', handleInitiateCall);
+    document.addEventListener('participant-left-call', handleParticipantLeft);
     
     return () => {
       document.removeEventListener('open-call', handleOpenCall);
       document.removeEventListener('initiate-call', handleInitiateCall);
+      document.removeEventListener('participant-left-call', handleParticipantLeft);
     };
-  }, []);
+  }, [activeCall, showCallInterface]);
   
   // Make outgoing call
   const makeCall = (recipient) => {
@@ -463,10 +488,28 @@ export default function Calls() {
     globalCallState.activeCall = recipient;
     globalCallState.showCallInterface = true;
     globalCallState.isOutgoingCall = true;
+    
+    // Comment out notification for outgoing calls
+    // toast.info(`Calling ${recipient.name || 'User'}...`, {
+    //   position: "top-right",
+    //   autoClose: 3000,
+    //   icon: <FontAwesomeIcon icon={faPhone} className="text-green-500 animate-pulse" />
+    // });
   };
   
   // End active call
-  const handleEndCall = () => {
+  const handleEndCall = (participantLeft = false) => {
+    // Show notification only when the other person leaves the call
+    if (activeCall && participantLeft) {
+      // Other person left the call
+      toast.info(`${activeCall.name || 'User'} has left the call`, {
+        position: "top-right",
+        autoClose: 3000,
+        icon: <FontAwesomeIcon icon={faPhoneSlash} className="text-red-500" />
+      });
+    }
+    // No notification when you end the call (red button)
+    
     setActiveCall(null);
     setShowCallInterface(false);
     setIsOutgoingCall(false);
@@ -480,7 +523,7 @@ export default function Calls() {
     <>
       <CallInterface
         isOpen={showCallInterface}
-        onClose={handleEndCall}
+        onClose={(participantLeft) => handleEndCall(participantLeft)}
         caller={activeCall}
         isOutgoing={isOutgoingCall}
       />
@@ -504,10 +547,6 @@ export const useCallFunctions = () => {
           }}
           onReject={() => {
             toast.dismiss(toastId);
-            toast.info("Call rejected", {
-              position: "top-right",
-              autoClose: 3000,
-            });
           }}
         />
       ),

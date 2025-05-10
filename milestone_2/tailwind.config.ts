@@ -61,8 +61,17 @@ const config: Config = {
       fontFamily: {
         'apple': ['-apple-system', 'BlinkMacSystemFont', 'sans-serif'],
       },
+      animation: {
+        'fadeIn': 'fadeIn 0.8s ease-in-out forwards',
+      },
+      keyframes: {
+        fadeIn: {
+          '0%': { opacity: '0', transform: 'scale(0.9)' },
+          '100%': { opacity: '1', transform: 'scale(1)' },
+        }
+      },
     },
   },
   plugins: [],
 }
-export default config 
+export default config

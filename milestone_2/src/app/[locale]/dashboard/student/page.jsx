@@ -15,6 +15,7 @@ const CallManager = dynamic(() => import('@/components/CallManager'), {
 export default function StudentDashboard() {
   const router = useRouter();
   const [currentStudent, setCurrentStudent] = useState(null);
+  const [showScadAdmin, setShowScadAdmin] = useState(false);
   const { receiveCall } = useCallFunctions();
   
   // Create SCAD admin contacts for student to call
@@ -43,13 +44,21 @@ export default function StudentDashboard() {
 
     setCurrentStudent(userData);
     
+    // Delay showing SCAD admin by 3 seconds
+    const scadAppearanceTimer = setTimeout(() => {
+      setShowScadAdmin(true);
+    }, 3000);
+    
     // Simulate receiving a call after 15 seconds for testing purposes
     // This can be removed or commented out in production
     const incomingCallTimer = setTimeout(() => {
       receiveCall(MOCK_USERS.scad);
     }, 15000);
     
-    return () => clearTimeout(incomingCallTimer);
+    return () => {
+      clearTimeout(incomingCallTimer);
+      clearTimeout(scadAppearanceTimer);
+    };
   }, [router, receiveCall]);
 
   if (!currentStudent) {
