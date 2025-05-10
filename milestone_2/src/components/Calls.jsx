@@ -365,16 +365,27 @@ export const CallInterface = ({ isOpen, onClose, caller = {}, isOutgoing = false
               </p>
             </div>
             
-            {/* Notes toggle button in header */}
-            <button 
-              onClick={handleToggleNotes}
-              className={`rounded-full p-2 transition-colors ${
-                showNotes ? 'bg-metallica-blue-500 text-white' : 'bg-metallica-blue-50 text-metallica-blue-700 hover:bg-metallica-blue-100'
-              }`}
-              aria-label="Toggle notes"
-            >
-              <FontAwesomeIcon icon={faNoteSticky} className="text-lg" />
-            </button>
+            <div className="flex items-center gap-3">
+              {/* Notes toggle button in header */}
+              <button 
+                onClick={handleToggleNotes}
+                className={`rounded-full p-2 transition-colors ${
+                  showNotes ? 'bg-metallica-blue-500 text-white' : 'bg-metallica-blue-50 text-metallica-blue-700 hover:bg-metallica-blue-100'
+                }`}
+                aria-label="Toggle notes"
+              >
+                <FontAwesomeIcon icon={faNoteSticky} className="text-lg" />
+              </button>
+              
+              {/* Close (X) button - moved to right side */}
+              <button 
+                onClick={() => handleEndCall(false)} 
+                className="rounded-full w-8 h-8 flex items-center justify-center bg-metallica-blue-100 hover:bg-metallica-blue-200 transition-colors"
+                aria-label="Close call"
+              >
+                <FontAwesomeIcon icon={faXmark} className="text-metallica-blue-700 text-lg" />
+              </button>
+            </div>
           </div>
           
           {/* Call content area */}
@@ -473,7 +484,7 @@ export const CallInterface = ({ isOpen, onClose, caller = {}, isOutgoing = false
           </div>
           
           {/* Call controls - circular buttons at the bottom */}
-          <div className="bg-white p-6 flex justify-center gap-5 border-t border-metallica-blue-100">
+          <div className="bg-white p-6 flex justify-center gap-5">
             <button 
               onClick={handleToggleMute} 
               className={`w-14 h-14 rounded-full flex items-center justify-center transition-all shadow-md ${
