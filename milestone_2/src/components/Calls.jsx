@@ -648,18 +648,18 @@ export const CallInterface = ({ isOpen, onClose, caller = {}, isOutgoing = false
           </div>
         )}
         
-        {/* Add Simulate Person Left button when no panels are open */}
+        {/* Add Simulate Person Left button when no panels are open - moved to top of screen */}
         {!showChat && !showNotes && (
-          <div className="absolute top-4 right-4">
+          <div className="absolute left-1/2 top-16 transform -translate-x-1/2 z-10">
             <button
               onClick={() => {
                 document.dispatchEvent(new CustomEvent('participant-left-call'));
                 handleEndCall(true);
               }}
-              className="bg-red-50 hover:bg-red-100 text-red-600 py-1 px-3 rounded-lg text-sm font-medium flex items-center gap-1 transition-colors border border-red-200"
+              className="bg-red-100 hover:bg-red-200 text-red-600 py-2 px-4 rounded-lg text-sm font-medium flex items-center gap-2 transition-colors border border-red-300 shadow-md"
               title="Test notification when other person leaves the call"
             >
-              <FontAwesomeIcon icon={faPhoneSlash} className="text-red-600 text-xs" />
+              <FontAwesomeIcon icon={faPhoneSlash} className="text-red-600" />
               <span>Simulate Person Left</span>
             </button>
           </div>
