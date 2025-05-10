@@ -805,11 +805,39 @@ export const useCallFunctions = () => {
     return toastId;
   };
   
-  // Make outgoing call
+  // Make outgoing call with notification
   const initiateCall = (recipient) => {
-    document.dispatchEvent(new CustomEvent('initiate-call', {
-      detail: { recipient }
-    }));
+    // Show "Calling..." notification first
+    const toastId = toast(
+      <div className="flex items-center gap-3">
+        <div className="relative w-10 h-10 overflow-hidden rounded-full border-2 border-white shadow-sm">
+          <img 
+            src={recipient.profileImage || "/images/student.png"} 
+            alt={recipient.name}
+            className="w-full h-full object-cover"
+          />
+        </div>
+        <div>
+          <h4 className="font-medium text-metallica-blue-800">{`Calling ${recipient.name}...`}</h4>
+          <p className="text-metallica-blue-600 text-xs">Please wait</p>
+        </div>
+      </div>,
+      {
+        position: "top-right",
+        autoClose: false,
+        closeButton: false,
+        hideProgressBar: true,
+        className: "calling-notification",
+      }
+    );
+    
+    // After a short delay, dismiss the notification and open the call interface
+    setTimeout(() => {
+      toast.dismiss(toastId);
+      document.dispatchEvent(new CustomEvent('initiate-call', {
+        detail: { recipient }
+      }));
+    }, 2000);
   };
   
   return { receiveCall, initiateCall };
