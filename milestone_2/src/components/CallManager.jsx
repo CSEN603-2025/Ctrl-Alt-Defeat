@@ -24,6 +24,7 @@ const CallManager = ({ contacts = [] }) => {
   }, []);
 
   const handleCallClick = (contact) => {
+    console.log("Initiating call to contact:", contact);
     initiateCall(contact);
     setIsMenuOpen(false);
   };
@@ -35,20 +36,35 @@ const CallManager = ({ contacts = [] }) => {
     
     if (currentUser?.role === 'student') {
       // If user is a student, simulate call from SCAD admin
-      caller = MOCK_USERS.scad;
+      caller = {
+        id: 'scad_admin',
+        name: MOCK_USERS.scad?.name || 'SCAD Admin',
+        profileImage: MOCK_USERS.scad?.profileImage || "/images/scad-icon.png",
+        role: 'scad'
+      };
+    } else if (currentUser?.role === 'scad') {
+      // If user is SCAD, simulate call from a student
+      caller = {
+        id: 'student_1',
+        name: 'John Doe',
+        profileImage: '/images/student-icon.png',
+        role: 'student'
+      };
     } else {
-      // If user is SCAD or other, simulate call from a random student
-      const students = MOCK_USERS.students || [];
-      if (students.length > 0) {
-        const randomIndex = Math.floor(Math.random() * students.length);
-        caller = students[randomIndex];
-      }
+      // Fallback caller
+      caller = {
+        id: 'default_caller',
+        name: 'Incoming Call',
+        profileImage: '/images/icons8-avatar-50.png',
+        role: 'unknown'
+      };
     }
     
-    if (caller) {
-      receiveCall(caller);
-      setShowSimulateOptions(false);
-    }
+    console.log('Simulating incoming call from:', caller);
+    // Use the receiveCall function from the useCallFunctions hook
+    // This will show the call notification that user can accept or reject
+    receiveCall(caller);
+    setShowSimulateOptions(false);
   };
 
   return (
@@ -58,6 +74,7 @@ const CallManager = ({ contacts = [] }) => {
         <button 
           onClick={() => setShowSimulateOptions(!showSimulateOptions)}
           className={`w-10 h-10 rounded-full shadow-lg transition-all duration-300 flex items-center justify-center bg-gray-600 hover:bg-gray-700 mb-2`}
+          aria-label="Debug options"
         >
           <FontAwesomeIcon 
             icon={faBug} 
@@ -89,6 +106,7 @@ const CallManager = ({ contacts = [] }) => {
           className={`w-14 h-14 rounded-full shadow-lg transition-all duration-300 flex items-center justify-center ${
             isMenuOpen ? 'bg-gray-600 rotate-135' : 'bg-metallica-blue-600 hover:bg-metallica-blue-700'
           }`}
+          aria-label="Open call menu"
         >
           <FontAwesomeIcon 
             icon={faPhone} 

@@ -15,7 +15,7 @@ const CallManager = dynamic(() => import('@/components/CallManager'), {
 export default function ScadDashboard() {
   const router = useRouter();
   const [currentUser, setCurrentUser] = useState(null);
-  const { receiveCall } = useCallFunctions();
+  const { receiveCall, initiateCall } = useCallFunctions();
   
   // Create student contacts for SCAD to call
   const studentContacts = MOCK_USERS.students.map(student => ({
@@ -41,21 +41,22 @@ export default function ScadDashboard() {
     }
     
     setCurrentUser(userData);
+    console.log('SCAD dashboard mounted - call functionality should be available');
     
-    // Simulate receiving a call after 20 seconds for testing purposes (can be removed in production)
-    const incomingCallTimer = setTimeout(() => {
-      // Pick a random student to simulate a call from
-      const randomStudent = MOCK_USERS.students[Math.floor(Math.random() * MOCK_USERS.students.length)];
-      receiveCall(randomStudent);
-    }, 20000);
-    
-    return () => clearTimeout(incomingCallTimer);
-  }, [router, receiveCall]);
+    return () => {
+      // No timeouts to clear now
+    };
+  }, [router]);
+
+  // Display loading state if user data isn't loaded yet
+  if (!currentUser) {
+    return <div>Loading...</div>;
+  }
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-metallica-blue-50 to-white px-8 py-6">
       <div className="max-w-6xl mx-auto">
-        <h1 className="text-2xl font-medium text-metallica-blue-00 mb-2 font-ibm-plex-sans">SCAD Dashboard</h1>
+        <h1 className="text-2xl font-medium text-metallica-blue-800 mb-6 font-ibm-plex-sans">SCAD Dashboard</h1>
         <CompanyTable companies={MOCK_COMPANIES} />
       </div>
       

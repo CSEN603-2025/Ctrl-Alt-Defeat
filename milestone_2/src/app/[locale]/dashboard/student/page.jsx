@@ -16,7 +16,7 @@ export default function StudentDashboard() {
   const router = useRouter();
   const [currentStudent, setCurrentStudent] = useState(null);
   const [showScadAdmin, setShowScadAdmin] = useState(false);
-  const { receiveCall } = useCallFunctions();
+  const { receiveCall, initiateCall } = useCallFunctions();
   
   // Create SCAD admin contacts for student to call
   const scadContacts = [
@@ -44,22 +44,15 @@ export default function StudentDashboard() {
 
     setCurrentStudent(userData);
     
-    // Delay showing SCAD admin by 3 seconds
-    const scadAppearanceTimer = setTimeout(() => {
-      setShowScadAdmin(true);
-    }, 3000);
+    // Show SCAD admin immediately - removing the delay
+    setShowScadAdmin(true);
     
-    // Simulate receiving a call after 15 seconds for testing purposes
-    // This can be removed or commented out in production
-    const incomingCallTimer = setTimeout(() => {
-      receiveCall(MOCK_USERS.scad);
-    }, 15000);
+    console.log('Student dashboard mounted - call functionality should be available');
     
     return () => {
-      clearTimeout(incomingCallTimer);
-      clearTimeout(scadAppearanceTimer);
+      // No timeouts to clear now
     };
-  }, [router, receiveCall]);
+  }, [router]);
 
   if (!currentStudent) {
     return <div>Loading...</div>;
@@ -70,6 +63,7 @@ export default function StudentDashboard() {
       <div className="flex-grow">
         <StudentProfile />
       </div>
+      {/* Always show the CallManager */}
       <div className="z-10">
         <CallManager contacts={scadContacts} />
       </div>

@@ -12,7 +12,10 @@ import {
   faVideo, 
   faVideoSlash,
   faDesktop,
-  faUserCircle
+  faUserCircle,
+  faComments,
+  faNoteSticky,
+  faXmark
 } from '@fortawesome/free-solid-svg-icons';
 
 // Global state for active call
@@ -87,6 +90,11 @@ export const CallInterface = ({ isOpen, onClose, caller = {}, isOutgoing = false
   const [callDuration, setCallDuration] = useState(0);
   const [showRemoteVideo, setShowRemoteVideo] = useState(!isOutgoing);
   const [callAccepted, setCallAccepted] = useState(!isOutgoing);
+  const [showChat, setShowChat] = useState(false); 
+  const [showNotes, setShowNotes] = useState(false);
+  const [chatMessages, setChatMessages] = useState([]);
+  const [noteContent, setNoteContent] = useState('');
+  const [currentMessage, setCurrentMessage] = useState('');
   
   const timerRef = useRef(null);
   const localVideoRef = useRef(null);
@@ -254,6 +262,70 @@ export const CallInterface = ({ isOpen, onClose, caller = {}, isOutgoing = false
     }
   };
   
+  // Toggle chat visibility
+  const handleToggleChat = () => {
+    setShowChat(!showChat);
+    // Close notes if open
+    if (showNotes) setShowNotes(false);
+  };
+
+  // Toggle notes visibility  
+  const handleToggleNotes = () => {
+    setShowNotes(!showNotes);
+    // Close chat if open
+    if (showChat) setShowChat(false);
+  };
+
+  // Handle sending a chat message
+  const handleSendMessage = (e) => {
+    e.preventDefault();
+    if (!currentMessage.trim()) return;
+    
+    const newMessage = {
+      id: Date.now(),
+      sender: currentUser.name || 'You',
+      content: currentMessage,
+      timestamp: new Date(),
+      isSelf: true
+    };
+    
+    setChatMessages(prev => [...prev, newMessage]);
+    setCurrentMessage('');
+    
+    // Simulate a response after 1-3 seconds
+    setTimeout(() => {
+      const response = {
+        id: Date.now() + 1,
+        sender: caller.name || 'Caller',
+        content: getAutoResponse(currentMessage),
+        timestamp: new Date(),
+        isSelf: false
+      };
+      
+      setChatMessages(prev => [...prev, response]);
+    }, Math.random() * 2000 + 1000);
+  };
+  
+  // Get a simple auto-response for demo purposes
+  const getAutoResponse = (message) => {
+    const responses = [
+      "I see. That makes sense.",
+      "Thanks for letting me know.",
+      "Got it!",
+      "That's interesting.",
+      "Let's discuss that further during our meeting.",
+      "I'll make a note of that.",
+      "Perfect, I'll look into it."
+    ];
+    
+    return responses[Math.floor(Math.random() * responses.length)];
+  };
+
+  // Handle saving notes
+  const handleSaveNotes = () => {
+    toast.success('Notes saved successfully!');
+  };
+
   // End call
   const handleEndCall = (participantLeft = false) => {
     // Stop all media tracks
@@ -270,166 +342,279 @@ export const CallInterface = ({ isOpen, onClose, caller = {}, isOutgoing = false
   if (!isOpen) return null;
   
   return (
-    <div className="fixed inset-0 flex items-center justify-center z-50 bg-[var(--metallica-blue-50)] bg-opacity-40 backdrop-blur-sm">
-      <div className="w-full max-w-3xl bg-white overflow-hidden shadow-lg relative rounded-2xl border border-[var(--metallica-blue-200)]">
-        {/* Call header */}
-        <div className="bg-[var(--metallica-blue-50)] p-4 flex justify-between items-center">
-          <div>
-            <h3 className="font-semibold text-xl text-[var(--metallica-blue-800)]">
-              {isOutgoing && !callAccepted ? `Calling ${caller.name || 'User'}...` : `Call with ${caller.name || 'User'}`}
-            </h3>
-            <p className="text-sm text-[var(--metallica-blue-600)]">
-              {callStatus === 'connected' 
-                ? `Connected • ${formatDuration(callDuration)}` 
-                : callStatus === 'connecting' 
-                ? 'Connecting...' 
-                : 'Calling...'}
-            </p>
-          </div>
-          {/* Removed top end call button since we'll have it in the controls below */}
-        </div>
-        
-        {/* Call content area */}
-        <div className="w-full relative">
-          {isOutgoing && !callAccepted ? (
-            // Initial outgoing call view - only shows caller's video centered with "You" label
-            <div className="w-full flex flex-col items-center justify-center p-4 bg-white">
-              <div className="w-full h-[50vh] bg-[var(--metallica-blue-50)] rounded-lg overflow-hidden relative">
-                {isVideoEnabled ? (
-                  <video 
-                    ref={localVideoRef} 
-                    autoPlay 
-                    playsInline 
-                    muted 
-                    className="w-full h-full object-cover"
-                  />
-                ) : (
-                  <div className="w-full h-full flex items-center justify-center flex-col">
-                    <FontAwesomeIcon icon={faUserCircle} className="text-[var(--metallica-blue-300)] text-7xl mb-3" />
-                    <p className="text-[var(--metallica-blue-600)] text-lg">Camera is off</p>
-                  </div>
-                )}
-              </div>
-              <div className="mt-3 text-center text-[var(--metallica-blue-700)] text-lg font-medium">
-                You
-              </div>
+    <div className="fixed inset-0 flex items-center justify-center z-50 bg-metallica-blue-50 bg-opacity-40 backdrop-blur-sm">
+      <div className="w-full max-w-4xl bg-white overflow-hidden shadow-xl relative rounded-2xl border-2 border-metallica-blue-200 flex flex-row">
+        {/* Left side - Main video area */}
+        <div className={`${showChat || showNotes ? 'w-3/5' : 'w-full'} transition-all duration-300 ease-in-out`}>
+          {/* Call header */}
+          <div className="bg-metallica-blue-50 p-4 flex justify-between items-center border-b border-metallica-blue-100">
+            <div>
+              <h3 className="font-semibold text-xl text-metallica-blue-800">
+                {isOutgoing && !callAccepted ? `Calling ${caller.name || 'User'}...` : `Call with ${caller.name || 'User'}`}
+              </h3>
+              <p className="text-sm text-metallica-blue-600">
+                {callStatus === 'connected' 
+                  ? `Connected • ${formatDuration(callDuration)}` 
+                  : callStatus === 'connecting' 
+                  ? 'Connecting...' 
+                  : 'Calling...'}
+              </p>
             </div>
-          ) : (
-            // Connected call view with main video display
-            <div className="relative w-full h-full">
-              {/* Main video (center) */}
-              <div className={`w-full h-[60vh] rounded-lg overflow-hidden bg-[var(--metallica-blue-50)] ${showRemoteVideo ? 'animate-fadeIn' : 'opacity-0'}`}>
-                {showRemoteVideo && isVideoEnabled ? (
-                  <video 
-                    ref={remoteVideoRef} 
-                    autoPlay 
-                    playsInline 
-                    className="w-full h-full object-cover"
-                  />
-                ) : (
-                  <div className="w-full h-full flex items-center justify-center flex-col">
-                    <FontAwesomeIcon icon={faUserCircle} className="text-[var(--metallica-blue-300)] text-7xl mb-3" />
-                    <p className="text-[var(--metallica-blue-600)] text-lg">Camera is off</p>
-                  </div>
-                )}
-                
-                {/* Remote user name label */}
-                <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 text-center">
-                  <div className="bg-white bg-opacity-80 px-4 py-2 rounded-full text-[var(--metallica-blue-800)] text-lg font-medium shadow-sm">
-                    {caller.name || "Caller"}
-                  </div>
+            
+            {/* Notes toggle button in header */}
+            <button 
+              onClick={handleToggleNotes}
+              className={`rounded-full p-2 transition-colors ${
+                showNotes ? 'bg-metallica-blue-500 text-white' : 'bg-metallica-blue-50 text-metallica-blue-700 hover:bg-metallica-blue-100'
+              }`}
+              aria-label="Toggle notes"
+            >
+              <FontAwesomeIcon icon={faNoteSticky} className="text-lg" />
+            </button>
+          </div>
+          
+          {/* Call content area */}
+          <div className="w-full relative">
+            {isOutgoing && !callAccepted ? (
+              // Initial outgoing call view - only shows caller's video centered with "You" label
+              <div className="w-full flex flex-col items-center justify-center p-4 bg-white">
+                <div className="w-full h-[50vh] bg-metallica-blue-50 rounded-lg overflow-hidden relative">
+                  {isVideoEnabled ? (
+                    <video 
+                      ref={localVideoRef} 
+                      autoPlay 
+                      playsInline 
+                      muted 
+                      className="w-full h-full object-cover"
+                    />
+                  ) : (
+                    <div className="w-full h-full flex items-center justify-center flex-col">
+                      <FontAwesomeIcon icon={faUserCircle} className="text-metallica-blue-300 text-7xl mb-3" />
+                      <p className="text-metallica-blue-600 text-lg">Camera is off</p>
+                    </div>
+                  )}
                 </div>
-                
-                {/* Screen sharing indicator */}
-                {isScreenSharing && (
-                  <div className="absolute top-16 left-4 bg-white bg-opacity-80 px-3 py-1 rounded-full text-[var(--metallica-blue-800)] text-sm shadow-sm">
-                    Screen sharing
-                  </div>
-                )}
-              </div>
-              
-              {/* Local video (PiP in bottom right corner) */}
-              <div className="absolute bottom-16 right-4 w-1/5 aspect-video bg-[var(--metallica-blue-50)] rounded-lg overflow-hidden border-2 border-white shadow-md">
-                {isVideoEnabled ? (
-                  <video 
-                    ref={localVideoRef} 
-                    autoPlay 
-                    playsInline 
-                    muted
-                    className="w-full h-full object-cover" 
-                  />
-                ) : (
-                  <div className="w-full h-full flex items-center justify-center flex-col">
-                    <FontAwesomeIcon icon={faUserCircle} className="text-[var(--metallica-blue-300)] text-2xl mb-1" />
-                    <p className="text-[var(--metallica-blue-600)] text-xs">Camera is off</p>
-                  </div>
-                )}
-                
-                {/* Your name label */}
-                <div className="absolute bottom-1 left-1/2 transform -translate-x-1/2 bg-white bg-opacity-80 px-2 py-1 rounded-full text-[var(--metallica-blue-800)] text-xs shadow-sm">
+                <div className="mt-3 text-center text-metallica-blue-700 text-lg font-medium">
                   You
                 </div>
               </div>
-              
-              {/* Volume slider on the left side */}
-              <div className="absolute left-4 top-1/2 transform -translate-y-1/2 bg-white bg-opacity-80 rounded-full py-4 px-1 shadow-sm">
-                <div className="h-32 flex flex-col items-center">
-                  <FontAwesomeIcon icon={isMuted ? faMicrophoneSlash : faMicrophone} className="text-[var(--metallica-blue-800)] text-sm mb-2" />
-                  <div className="bg-[var(--metallica-blue-100)] w-1 h-24 rounded-full relative">
-                    <div className="absolute bottom-0 w-1 bg-[var(--metallica-blue-500)] rounded-full" style={{ height: isMuted ? '0%' : '80%' }}></div>
+            ) : (
+              // Connected call view with main video display
+              <div className="relative w-full h-full">
+                {/* Main video (center) */}
+                <div className={`w-full h-[50vh] rounded-lg overflow-hidden bg-metallica-blue-50 ${showRemoteVideo ? 'animate-fadeIn' : 'opacity-0'}`}>
+                  {showRemoteVideo && isVideoEnabled ? (
+                    <video 
+                      ref={remoteVideoRef} 
+                      autoPlay 
+                      playsInline 
+                      className="w-full h-full object-cover"
+                    />
+                  ) : (
+                    <div className="w-full h-full flex items-center justify-center flex-col">
+                      <FontAwesomeIcon icon={faUserCircle} className="text-metallica-blue-300 text-7xl mb-3" />
+                      <p className="text-metallica-blue-600 text-lg">Camera is off</p>
+                    </div>
+                  )}
+                  
+                  {/* Remote user name label */}
+                  <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 text-center">
+                    <div className="bg-white bg-opacity-80 px-4 py-2 rounded-full text-metallica-blue-800 text-lg font-medium shadow-sm">
+                      {caller.name || "Caller"}
+                    </div>
+                  </div>
+                  
+                  {/* Screen sharing indicator */}
+                  {isScreenSharing && (
+                    <div className="absolute top-4 left-4 bg-white bg-opacity-80 px-3 py-1 rounded-full text-metallica-blue-800 text-sm shadow-sm">
+                      Screen sharing
+                    </div>
+                  )}
+                </div>
+                
+                {/* Local video (PiP in bottom right corner) */}
+                <div className="absolute bottom-16 right-4 w-1/5 aspect-video bg-metallica-blue-50 rounded-lg overflow-hidden border-2 border-white shadow-md">
+                  {isVideoEnabled ? (
+                    <video 
+                      ref={localVideoRef} 
+                      autoPlay 
+                      playsInline 
+                      muted
+                      className="w-full h-full object-cover" 
+                    />
+                  ) : (
+                    <div className="w-full h-full flex items-center justify-center flex-col">
+                      <FontAwesomeIcon icon={faUserCircle} className="text-metallica-blue-300 text-2xl mb-1" />
+                      <p className="text-metallica-blue-600 text-xs">Camera is off</p>
+                    </div>
+                  )}
+                  
+                  {/* Your name label */}
+                  <div className="absolute bottom-1 left-1/2 transform -translate-x-1/2 bg-white bg-opacity-80 px-2 py-1 rounded-full text-metallica-blue-800 text-xs shadow-sm">
+                    You
+                  </div>
+                </div>
+                
+                {/* Volume slider on the left side */}
+                <div className="absolute left-4 top-1/2 transform -translate-y-1/2 bg-white bg-opacity-80 rounded-full py-4 px-1 shadow-sm">
+                  <div className="h-32 flex flex-col items-center">
+                    <FontAwesomeIcon icon={isMuted ? faMicrophoneSlash : faMicrophone} className="text-metallica-blue-800 text-sm mb-2" />
+                    <div className="bg-metallica-blue-100 w-1 h-24 rounded-full relative">
+                      <div className="absolute bottom-0 w-1 bg-metallica-blue-500 rounded-full" style={{ height: isMuted ? '0%' : '80%' }}></div>
+                    </div>
                   </div>
                 </div>
               </div>
-            </div>
-          )}
+            )}
+          </div>
+          
+          {/* Call controls - circular buttons at the bottom */}
+          <div className="bg-white p-6 flex justify-center gap-5 border-t border-metallica-blue-100">
+            <button 
+              onClick={handleToggleMute} 
+              className={`w-14 h-14 rounded-full flex items-center justify-center transition-all shadow-md ${
+                isMuted ? 'bg-red-500' : 'bg-metallica-blue-50 hover:bg-metallica-blue-100'
+              }`}
+              title={isMuted ? "Unmute" : "Mute"}
+            >
+              <FontAwesomeIcon icon={isMuted ? faMicrophoneSlash : faMicrophone} className={`${isMuted ? 'text-white' : 'text-metallica-blue-700'} text-lg`} />
+            </button>
+            
+            <button 
+              onClick={handleToggleVideo} 
+              className={`w-14 h-14 rounded-full flex items-center justify-center transition-all shadow-md ${
+                !isVideoEnabled ? 'bg-red-500' : 'bg-metallica-blue-50 hover:bg-metallica-blue-100'
+              }`}
+              title={isVideoEnabled ? "Turn off camera" : "Turn on camera"}
+            >
+              <FontAwesomeIcon icon={isVideoEnabled ? faVideo : faVideoSlash} className={`${!isVideoEnabled ? 'text-white' : 'text-metallica-blue-700'} text-lg`} />
+            </button>
+            
+            <button 
+              onClick={handleEndCall}
+              className="w-16 h-16 bg-red-500 hover:bg-red-600 rounded-full flex items-center justify-center transition-all shadow-md"
+              title="End call"
+            >
+              <FontAwesomeIcon icon={faPhoneSlash} className="text-white text-xl" />
+            </button>
+            
+            <button 
+              onClick={handleToggleScreenShare}
+              className={`w-14 h-14 rounded-full flex items-center justify-center transition-all shadow-md ${
+                isScreenSharing ? 'bg-green-500' : 'bg-metallica-blue-50 hover:bg-metallica-blue-100'
+              }`}
+              title={isScreenSharing ? "Stop sharing screen" : "Share screen"}
+            >
+              <FontAwesomeIcon icon={faDesktop} className={`${isScreenSharing ? 'text-white' : 'text-metallica-blue-700'} text-lg`} />
+            </button>
+            
+            <button
+              onClick={handleToggleChat}
+              className={`w-14 h-14 rounded-full flex items-center justify-center transition-all shadow-md ${
+                showChat ? 'bg-metallica-blue-500 text-white' : 'bg-metallica-blue-50 hover:bg-metallica-blue-100'
+              }`}
+              title="Chat"
+            >
+              <FontAwesomeIcon icon={faComments} className={`${showChat ? 'text-white' : 'text-metallica-blue-700'} text-lg`} />
+            </button>
+          </div>
         </div>
         
-        {/* Call controls - circular buttons at the bottom */}
-        <div className="bg-white p-6 flex justify-center gap-5">
-          <button 
-            onClick={handleToggleMute} 
-            className={`w-14 h-14 rounded-full flex items-center justify-center transition-all shadow-md ${
-              isMuted ? 'bg-red-500' : 'bg-[var(--metallica-blue-50)] hover:bg-[var(--metallica-blue-100)]'
-            }`}
-          >
-            <FontAwesomeIcon icon={isMuted ? faMicrophoneSlash : faMicrophone} className={`${isMuted ? 'text-white' : 'text-[var(--metallica-blue-700)]'} text-lg`} />
-          </button>
-          
-          <button 
-            onClick={handleToggleVideo} 
-            className={`w-14 h-14 rounded-full flex items-center justify-center transition-all shadow-md ${
-              !isVideoEnabled ? 'bg-red-500' : 'bg-[var(--metallica-blue-50)] hover:bg-[var(--metallica-blue-100)]'
-            }`}
-          >
-            <FontAwesomeIcon icon={isVideoEnabled ? faVideo : faVideoSlash} className={`${!isVideoEnabled ? 'text-white' : 'text-[var(--metallica-blue-700)]'} text-lg`} />
-          </button>
-          
-          <button 
-            onClick={handleEndCall}
-            className="w-16 h-16 bg-red-500 hover:bg-red-600 rounded-full flex items-center justify-center transition-all shadow-md"
-          >
-            <FontAwesomeIcon icon={faPhoneSlash} className="text-white text-xl" />
-          </button>
-          
-          <button 
-            onClick={handleToggleScreenShare}
-            className={`w-14 h-14 rounded-full flex items-center justify-center transition-all shadow-md ${
-              isScreenSharing ? 'bg-[var(--metallica-green-pop-color)]' : 'bg-[var(--metallica-blue-50)] hover:bg-[var(--metallica-blue-100)]'
-            }`}
-          >
-            <FontAwesomeIcon icon={faDesktop} className={`${isScreenSharing ? 'text-white' : 'text-[var(--metallica-blue-700)]'} text-lg`} />
-          </button>
-          
-          <button
-            className="w-14 h-14 bg-[var(--metallica-blue-50)] hover:bg-[var(--metallica-blue-100)] rounded-full flex items-center justify-center transition-all shadow-md"
-            onClick={() => {}}
-          >
-            <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-[var(--metallica-blue-700)]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-            </svg>
-          </button>
-        </div>
+        {/* Right side - Chat or Notes panel */}
+        {(showChat || showNotes) && (
+          <div className="w-2/5 border-l border-metallica-blue-200 h-full flex flex-col">
+            {/* Panel header */}
+            <div className="bg-metallica-blue-50 p-4 flex justify-between items-center border-b border-metallica-blue-100">
+              <h3 className="font-semibold text-metallica-blue-800">
+                {showChat ? 'Chat' : 'Notes'}
+              </h3>
+              <button 
+                onClick={showChat ? handleToggleChat : handleToggleNotes}
+                className="text-metallica-blue-600 hover:text-metallica-blue-800"
+              >
+                <FontAwesomeIcon icon={faXmark} className="text-lg" />
+              </button>
+            </div>
+            
+            {/* Chat panel */}
+            {showChat && (
+              <div className="flex flex-col h-full">
+                {/* Chat messages */}
+                <div className="flex-grow p-4 space-y-4 overflow-y-auto" style={{ maxHeight: '50vh' }}>
+                  {chatMessages.length === 0 ? (
+                    <p className="text-center text-metallica-blue-400 py-8">No messages yet. Start the conversation!</p>
+                  ) : (
+                    chatMessages.map(message => (
+                      <div 
+                        key={message.id}
+                        className={`flex ${message.isSelf ? 'justify-end' : 'justify-start'}`}
+                      >
+                        <div className={`max-w-[80%] rounded-2xl px-4 py-2 ${
+                          message.isSelf 
+                            ? 'bg-metallica-blue-500 text-white rounded-tr-none' 
+                            : 'bg-metallica-blue-50 text-metallica-blue-800 rounded-tl-none'
+                        }`}>
+                          <p>{message.content}</p>
+                          <p className={`text-xs ${message.isSelf ? 'text-metallica-blue-100' : 'text-metallica-blue-400'} text-right mt-1`}>
+                            {new Date(message.timestamp).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}
+                          </p>
+                        </div>
+                      </div>
+                    ))
+                  )}
+                </div>
+                
+                {/* Message input */}
+                <div className="p-4 border-t border-metallica-blue-100">
+                  <form onSubmit={handleSendMessage} className="flex gap-2">
+                    <input
+                      type="text"
+                      value={currentMessage}
+                      onChange={(e) => setCurrentMessage(e.target.value)}
+                      className="flex-grow border border-metallica-blue-200 rounded-full py-2 px-4 focus:outline-none focus:ring-2 focus:ring-metallica-blue-300 focus:border-transparent"
+                      placeholder="Type a message..."
+                    />
+                    <button
+                      type="submit"
+                      className="bg-metallica-blue-500 text-white rounded-full w-10 h-10 flex items-center justify-center hover:bg-metallica-blue-600 transition-colors"
+                      disabled={!currentMessage.trim()}
+                    >
+                      <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                        <path d="M10.894 2.553a1 1 0 00-1.788 0l-7 14a1 1 0 001.169 1.409l5-1.429A1 1 0 009 15.571V11a1 1 0 112 0v4.571a1 1 0 00.725.962l5 1.428a1 1 0 001.17-1.408l-7-14z" />
+                      </svg>
+                    </button>
+                  </form>
+                </div>
+              </div>
+            )}
+            
+            {/* Notes panel */}
+            {showNotes && (
+              <div className="flex flex-col h-full">
+                <div className="flex-grow p-4">
+                  <textarea
+                    value={noteContent}
+                    onChange={(e) => setNoteContent(e.target.value)}
+                    className="w-full h-full p-3 border border-metallica-blue-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-metallica-blue-300 focus:border-transparent resize-none"
+                    placeholder="Take notes during your call..."
+                    style={{ minHeight: '50vh' }}
+                  ></textarea>
+                </div>
+                <div className="p-4 border-t border-metallica-blue-100 flex justify-end">
+                  <button
+                    onClick={handleSaveNotes}
+                    className="bg-metallica-blue-500 hover:bg-metallica-blue-600 text-white py-2 px-4 rounded-lg font-medium flex items-center gap-2 transition-colors"
+                  >
+                    <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                      <path d="M7.707 10.293a1 1 0 10-1.414 1.414l3 3a1 1 0 001.414 0l3-3a1 1 0 00-1.414-1.414L11 11.586V6h5a2 2 0 012 2v7a2 2 0 01-2 2H4a2 2 0 01-2-2V8a2 2 0 012-2h5v5.586l-1.293-1.293zM9 4a1 1 0 012 0v2H9V4z" />
+                    </svg>
+                    Save Notes
+                  </button>
+                </div>
+              </div>
+            )}
+          </div>
+        )}
       </div>
     </div>
   );
@@ -444,6 +629,7 @@ export default function Calls() {
   // Listen for call events
   useEffect(() => {
     const handleOpenCall = (event) => {
+      console.log("Open call event received:", event.detail);
       const { activeCall, isOutgoing = false } = event.detail;
       setActiveCall(activeCall);
       setIsOutgoingCall(isOutgoing);
@@ -456,6 +642,7 @@ export default function Calls() {
     };
     
     const handleInitiateCall = (event) => {
+      console.log("Initiate call event received:", event.detail);
       const { recipient } = event.detail;
       makeCall(recipient);
     };
@@ -468,6 +655,7 @@ export default function Calls() {
       }
     };
     
+    // Add event listeners
     document.addEventListener('open-call', handleOpenCall);
     document.addEventListener('initiate-call', handleInitiateCall);
     document.addEventListener('participant-left-call', handleParticipantLeft);
@@ -481,6 +669,7 @@ export default function Calls() {
   
   // Make outgoing call
   const makeCall = (recipient) => {
+    console.log("Making call to:", recipient);
     setActiveCall(recipient);
     setIsOutgoingCall(true);
     setShowCallInterface(true);
@@ -488,13 +677,6 @@ export default function Calls() {
     globalCallState.activeCall = recipient;
     globalCallState.showCallInterface = true;
     globalCallState.isOutgoingCall = true;
-    
-    // Comment out notification for outgoing calls
-    // toast.info(`Calling ${recipient.name || 'User'}...`, {
-    //   position: "top-right",
-    //   autoClose: 3000,
-    //   icon: <FontAwesomeIcon icon={faPhone} className="text-green-500 animate-pulse" />
-    // });
   };
   
   // End active call
