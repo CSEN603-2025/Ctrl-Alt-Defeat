@@ -2,6 +2,13 @@
 import { useState } from "react";
 import StatusBadge from "./shared/StatusBadge";
 
+const statusColors = {
+  'Accepted': 'bg-green-100 text-green-800 border-green-400',
+  'Flagged': 'bg-yellow-100 text-yellow-800 border-yellow-400',
+  'Pending': 'bg-blue-100 text-blue-800 border-blue-400',
+  'Rejected': 'bg-red-100 text-red-800 border-red-400',
+};
+
 export default function ReportTiles({ tiles, onEditClick, onDeleteClick }) {
   const [expandedIndex, setExpandedIndex] = useState(null);
 
@@ -11,8 +18,15 @@ export default function ReportTiles({ tiles, onEditClick, onDeleteClick }) {
 
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-      {tiles.map((tile, index) => (
-        <div key={index} className="p-6 bg-white rounded-lg shadow-md border border-gray-200 overflow-hidden break-words">
+      {tiles.map((tile, index) => (        <div key={index} className="relative p-6 bg-white rounded-lg shadow-md border border-gray-200 overflow-hidden break-words">
+          {/* Status Badge */}
+          {tile.status && (
+            <div className="absolute top-4 right-4">
+              <StatusBadge color={statusColors[tile.status]} className="border">
+                {tile.status.toUpperCase()}
+              </StatusBadge>
+            </div>
+          )}
           <h1 className="text-lg font-bold text-gray-800 mb-2 break-words">Report Summary</h1>
           <h3>Internship Title:</h3>
           <p>{tile.internshipTitle}</p>

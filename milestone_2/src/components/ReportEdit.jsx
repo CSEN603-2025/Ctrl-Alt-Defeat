@@ -1,17 +1,24 @@
 import StatusBadge from "./shared/StatusBadge";
 import { useState, useEffect } from "react";
 import { CSEN_Courses, DMET_Courses, BioTech_Courses, Law_Courses } from "../../constants/mockData";
+import Modal from "./shared/Modal";
 
 export default function TileEdit({ report, onSave, onCancel }) {
     const [editReport, setEditReport] = useState(report);
     const [courses, setCourses] = useState([]);
     const [selectedCourses, setSelectedCourses] = useState(report.selectedCourses || []);
+    const [isModalOpen, setIsModalOpen] = useState(true);
 
     useEffect(() => {
         setEditReport(report);
         setSelectedCourses(report.selectedCourses || []);
         updateCourses(report.major, report.selectedCourses || []);
     }, [report]);
+
+    const handleClose = () => {
+        setIsModalOpen(false);
+        onCancel();
+    };
 
     const updateCourses = (major, selectedCourses = []) => {
         let availableCourses = [];
@@ -59,8 +66,9 @@ export default function TileEdit({ report, onSave, onCancel }) {
     };
 
     return (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-            <div className="bg-white p-6 rounded shadow-lg space-y-3 w-full max-w-md max-h-[80vh] overflow-y-auto">
+        <Modal isOpen={isModalOpen} onClose={handleClose}>
+            <div className="p-6 bg-[#E2F4F7] rounded-lg border-2 border-[#5DB2C7] max-h-[80vh] overflow-y-auto">
+                <h3 className="text-lg font-bold text-gray-800 mb-4">Edit Report</h3>
                 <label className="block text-sm font-medium text-gray-700">Internship Title:</label>
                 <input required name="internshipTitle" value={editReport.internshipTitle} onChange={handleChange} className="w-full border p-2 rounded" />
 
@@ -177,6 +185,6 @@ export default function TileEdit({ report, onSave, onCancel }) {
                     <button onClick={onCancel} className="px-4 py-2 bg-gray-500 text-white rounded">Cancel</button>
                 </div>
             </div>
-        </div>
+        </Modal>
     );
 }

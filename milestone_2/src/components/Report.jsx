@@ -29,11 +29,11 @@ export default function Report({ onAddTile, isOpen, onClose }) {
     };
 
     const handleSubmit = (e) => {
-        e.preventDefault();
-        onAddTile({
+        e.preventDefault();        onAddTile({
             ...filledReport,
             major,
-            selectedCourses
+            selectedCourses,
+            status: 'Pending'  // Set default status to Pending for new reports
         });
         setReport({
             internshipTitle: '',
