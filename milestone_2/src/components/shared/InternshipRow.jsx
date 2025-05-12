@@ -270,30 +270,30 @@ export default function InternshipRow({ internship, type, onApplicationCompleted
               >
                 {isApplied ? 'Applied' : 'Apply'}
               </button>
-            ) : internship.appliedDate ? (
-
+            ) : type === 'applied' ? (
+              <button
+                className="px-4 py-2 bg-[#5DB2C7] text-white rounded-lg hover:bg-[#4796a8] transition w-full sm:w-auto text-sm"
+                onClick={() => router.push(`/dashboard/student/applied-internships/${internship.id}`)}
+              >
+                View Application
+              </button>
+            ) : type === 'my' ? (
+              <div className="flex items-center gap-4">
+                {internship.status === 'completed' && (
+                  <button
+                    onClick={handleOpenReportCreate}
+                    className="px-4 py-2 bg-[#5DB2C7] text-white rounded-lg hover:bg-[#4796a8] transition w-full sm:w-auto text-sm"
+                  >
+                    Create Report
+                  </button>
+                )}
+                {/* View Application button for all 'my' internships (current, completed) */}
                 <button
                   className="px-4 py-2 bg-[#5DB2C7] text-white rounded-lg hover:bg-[#4796a8] transition w-full sm:w-auto text-sm"
                   onClick={() => router.push(`/dashboard/student/applied-internships/${internship.id}`)}
                 >
                   View Application
-                </button>            ) : internship.status === 'completed' ? (
-              <div className="flex gap-4"> 
-
-                <button
-                  onClick={handleOpenReportCreate}
-                  className="px-4 py-2 bg-[#5DB2C7] text-white rounded-lg hover:bg-[#4796a8] transition w-full sm:w-auto text-sm"
-                >
-                  Create Report
                 </button>
-
-                <button
-                  onClick={handleOpenUploadModal}
-                  className="px-4 py-2 bg-[#5DB2C7] text-white rounded-lg hover:bg-[#4796a8] transition w-full sm:w-auto text-sm"
-                >
-                  Apply
-                </button>
-
               </div>
             ) : null}
           </div>
