@@ -310,3 +310,42 @@ export const MOCK_APPLIED_INTERNSHIPS = [
     status: "rejected"
   }
 ];
+
+export const SkillsProffessional = [
+'Ability to adapt to change',						
+'Analytical skills',						
+'Collecting data/ research data skills',						
+'Creativity', 						
+'Follow up skills',						
+'Interpersonal skills with peers, supervisors, and clients',						
+'Problem solving',						
+'Punctuality', 						
+'Reporting skills',						
+'Responsibility and accountability', 						
+'Stress handling',						
+'Taking initiatives', 						
+'Teamwork', 						
+'Time management'
+]
+
+export const TechnicalBackground = [
+'Technical Knowledge',						
+'Compatibility of technical skills with the job'
+]
+
+export const CommandLanguages = [
+'Arabic',						
+'English',						
+'German'						
+];
+
+export const Students = [
+  "Hatem",
+  "Omar",
+  "Salma",
+  "Sara",
+  "Ahmed",
+  "Mohamed",
+  "Ali",
+  "Yasmin"
+]
