@@ -1,7 +1,7 @@
 "use client";
 import { useState } from 'react';
 import SearchBar from './SearchBar';
-import Filter from './Filter';
+import Filter from '../Filter';
 
 export default function CardTable({
   title = "",

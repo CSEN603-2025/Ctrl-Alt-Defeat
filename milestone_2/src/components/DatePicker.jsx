@@ -1,17 +1,36 @@
 "use client";
 import * as React from "react";
-import { format, parse } from "date-fns";
+import { format, parse, isValid } from "date-fns";
 import { Calendar as CalendarIcon, X } from "lucide-react";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Calendar } from "@/components/ui/calendar";
 
-export default function DatePicker({ selectedDate, onDateChange }) {
-  const parsedDate = typeof selectedDate === 'string'
-    ? parse(selectedDate, 'yyyy-MM-dd', new Date())
-    : selectedDate;
+export default function DatePicker({ selectedDate, onDateChange, disabled }) {
+  // Handle the date parsing with error handling
+  const parseSelectedDate = () => {
+    if (!selectedDate) return null;
+    
+    try {
+      if (typeof selectedDate === 'string') {
+        const parsed = parse(selectedDate, 'yyyy-MM-dd', new Date());
+        return isValid(parsed) ? parsed : null;
+      }
+      return selectedDate instanceof Date && isValid(selectedDate) ? selectedDate : null;
+    } catch (error) {
+      console.error("Date parsing error:", error);
+      return null;
+    }
+  };
+
+  const parsedDate = parseSelectedDate();
 
   const handleDateSelect = (date) => {
-    onDateChange(date ? format(date, 'yyyy-MM-dd') : null);
+    try {
+      onDateChange(date ? format(date, 'yyyy-MM-dd') : null);
+    } catch (error) {
+      console.error("Date selection error:", error);
+      onDateChange(null);
+    }
   };
 
   return (
@@ -27,7 +46,10 @@ export default function DatePicker({ selectedDate, onDateChange }) {
         >
           <CalendarIcon className="mr-2 h-4 w-4" />
           <span>
-            {parsedDate ? format(parsedDate, "MMM d, yyyy") : "Filter by date"}
+            {parsedDate && isValid(parsedDate) 
+              ? format(parsedDate, "MMM d, yyyy") 
+              : "Select a date"
+            }
           </span>
           {parsedDate && (
             <X
@@ -46,7 +68,7 @@ export default function DatePicker({ selectedDate, onDateChange }) {
           selected={parsedDate}
           onSelect={handleDateSelect}
           initialFocus
-          disabled={(date) => date > new Date() || date < new Date("1900-01-01")}
+          disabled={disabled}
         />
       </PopoverContent>
     </Popover>

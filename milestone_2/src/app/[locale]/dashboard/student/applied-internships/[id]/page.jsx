@@ -26,7 +26,7 @@ export default function ApplicationViewPage() {
   };
 
   return (
-    <div className="container mx-auto px-4 py-8 max-w-2xl">
+    <div className="container mx-auto px-4 pt-0 pb-8 max-w-2xl">
       <InfoCard
         title={application.title}
         subtitle={application.type + (application.jobSetting ? ` • ${application.jobSetting}` : "")}

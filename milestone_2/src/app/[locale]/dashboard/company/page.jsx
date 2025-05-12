@@ -1,5 +1,3 @@
-//  MOVED FROM /company TO /dashboard/company
-
 "use client"
 
 import { useState } from 'react';

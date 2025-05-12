@@ -1,4 +1,6 @@
 import { useEffect, useState } from 'react';
+import DatePicker from './DatePicker';
+import { format, isBefore, startOfDay, isValid, parseISO } from 'date-fns';
 
 export default function CompanyCreatePost({ onAddPost, onFormChange, initialPost, isEditing }) {
   const [form, setForm] = useState({
@@ -27,6 +29,16 @@ export default function CompanyCreatePost({ onAddPost, onFormChange, initialPost
   const handleChange = (e) => {
     const { name, value } = e.target;
     const updatedForm = { ...form, [name]: value };
+    setForm(updatedForm);
+
+    // Send updated form data to parent for live preview
+    if (onFormChange) {
+      onFormChange(updatedForm);
+    }
+  };
+
+  const handleDateChange = (date) => {
+    const updatedForm = { ...form, startDate: date };
     setForm(updatedForm);
 
     // Send updated form data to parent for live preview
@@ -110,6 +122,19 @@ export default function CompanyCreatePost({ onAddPost, onFormChange, initialPost
     }
   }, []);
 
+  // Function to disable past dates
+  const disablePastDates = (date) => {
+    if (!isValid(date)) return true;
+    
+    try {
+      const today = startOfDay(new Date());
+      return isBefore(date, today);
+    } catch (error) {
+      console.error("Error in date validation:", error);
+      return false;
+    }
+  };
+
   // Common input style classes
   const inputClasses = "w-full border-2 border-[var(--metallica-blue-200)] p-2 rounded-md bg-white focus:border-[var(--metallica-blue-500)] focus:outline-none transition-colors";
   const labelClasses = "block text-sm font-medium text-[var(--metallica-blue-800)] mb-1";
@@ -143,14 +168,16 @@ export default function CompanyCreatePost({ onAddPost, onFormChange, initialPost
 
       <div className={sectionClasses}>
         <label className={labelClasses}>Start Date</label>
-        <input
-          type="date"
-          name="startDate"
-          value={form.startDate}
-          onChange={handleChange}
-          required
-          className={inputClasses}
-        />
+        <div className="mt-1">
+          <DatePicker 
+            selectedDate={form.startDate}
+            onDateChange={handleDateChange}
+            disabled={disablePastDates}
+          />
+        </div>
+        {!form.startDate && (
+          <p className="text-red-500 text-xs mt-1">Please select a start date</p>
+        )}
       </div>
 
       <div className={sectionClasses}>

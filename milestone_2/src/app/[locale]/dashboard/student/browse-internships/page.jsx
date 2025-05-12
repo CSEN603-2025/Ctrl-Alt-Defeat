@@ -13,13 +13,13 @@ export default function BrowseInternshipsPage() {
     : getRecommendedInternships();
 
   return (
-    <div className="container mx-auto px-4 py-8">
+    <div className="container mx-auto px-4 pt-0 pb-8">
       <InternshipList
         title="INTERNSHIP OPPORTUNITIES"
         internships={internshipsToDisplay}
         type="regular"
         customFilterPanel={
-          <div className="flex flex-wrap gap-2">
+          <div className="flex flex-wrap gap-2 mb-4">
             <button
               onClick={() => setFilterType('all')}
               className={`px-6 py-2 rounded-full text-sm font-medium transition-colors border

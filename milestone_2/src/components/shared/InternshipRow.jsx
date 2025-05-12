@@ -2,7 +2,10 @@
 import { useState } from 'react';
 import { ChevronDown } from 'lucide-react';
 import { useRouter } from 'next/navigation';
-import StatusBadge from './shared/StatusBadge';
+import StatusBadge from './StatusBadge';
+import { Tooltip } from 'react-tooltip';
+import UploadDocuments from '../UploadDocuments';
+import Report from "../Report"; // Import the Report component
 
 const formatDate = (isoDate) => {
   if (!isoDate) return "-";
@@ -34,10 +37,20 @@ const timeAgo = (isoDate) => {
   return 'posted just now';
 };
 
-export default function InternshipRow({ internship, type }) {
+// Tooltip messages specifically for APPLIED internship statuses
+const appliedStatusTooltipMessages = {
+  accepted: "Your application has been accepted by the company! Congratulations!",
+  pending: "Your application has been submitted but not yet reviewed by the company.",
+  finalized: "You are among the top applicants, and the company may proceed with an offer soon. Awaiting final confirmation.",
+  rejected: "Unfortunately, your application was not selected for this position this time.",
+};
+
+export default function InternshipRow({ internship, type, onApplicationCompleted, isApplied }) {
   const [isOpen, setIsOpen] = useState(false);
   const [isHeightAnimating, setIsHeightAnimating] = useState(false);
   const [isDescriptionVisible, setIsDescriptionVisible] = useState(false);
+  const [isUploadModalOpen, setIsUploadModalOpen] = useState(false);
+  const [reportCreate, setReportCreate] = useState(false);
   const router = useRouter();
 
   const handleToggle = () => {
@@ -55,6 +68,35 @@ export default function InternshipRow({ internship, type }) {
       }, 600);
     }
   };
+
+  // Determine tooltip content ONLY for applied type
+  let tooltipContent = undefined;
+  if (type === 'applied') {
+    const currentStatus = internship.status ? internship.status.toLowerCase() : null;
+    if (currentStatus) {
+      tooltipContent = appliedStatusTooltipMessages[currentStatus];
+    }
+  }
+
+  const handleOpenUploadModal = () => {
+    setIsUploadModalOpen(true);
+  };
+
+  const handleCloseUploadModal = (success, appliedInternshipId) => {
+    setIsUploadModalOpen(false);
+    if (success && onApplicationCompleted && appliedInternshipId) {
+      onApplicationCompleted(appliedInternshipId);
+    }
+    // Potentially refresh data or give feedback if an upload happened - handled by parent
+  };
+
+  const handleOpenReportCreate = () => {
+    setReportCreate(true);
+  }
+
+  const handleCloseReportCreate = () => {
+    setReportCreate(false);
+  }
 
   return (
     <div className="mb-3 w-full max-w-3xl mx-auto">
@@ -112,6 +154,8 @@ export default function InternshipRow({ internship, type }) {
 
               {type === 'applied' && (
                 <StatusBadge
+                  data-tooltip-id="status-tooltip"
+                  data-tooltip-content={tooltipContent}
                   color={
                     internship.status === 'accepted' ? 'bg-green-100 text-green-800 border-green-400' :
                       internship.status === 'rejected' ? 'bg-red-100 text-red-800 border-red-400' :
@@ -216,24 +260,65 @@ export default function InternshipRow({ internship, type }) {
               </p>
             </div>
             {type === 'regular' ? (
-              <button className="px-4 py-2 bg-[#5DB2C7] text-white rounded-lg hover:bg-[#4796a8] transition w-full sm:w-auto text-sm">
-                Apply
+              <button
+                onClick={isApplied ? undefined : handleOpenUploadModal}
+                className={`px-4 py-2 text-white rounded-lg transition w-full sm:w-auto text-sm ${isApplied
+                  ? 'bg-gray-400 cursor-not-allowed'
+                  : 'bg-[#5DB2C7] hover:bg-[#4796a8]'
+                  }`}
+                disabled={isApplied}
+              >
+                {isApplied ? 'Applied' : 'Apply'}
               </button>
-            ) : internship.appliedDate ? (
+            ) : type === 'applied' ? (
               <button
                 className="px-4 py-2 bg-[#5DB2C7] text-white rounded-lg hover:bg-[#4796a8] transition w-full sm:w-auto text-sm"
                 onClick={() => router.push(`/dashboard/student/applied-internships/${internship.id}`)}
               >
                 View Application
               </button>
-            ) : (
-              <button className="px-4 py-2 bg-[#5DB2C7] text-white rounded-lg hover:bg-[#4796a8] transition w-full sm:w-auto text-sm">
-                Apply
-              </button>
-            )}
+            ) : type === 'my' ? (
+              <div className="flex items-center gap-4">
+                {internship.status === 'completed' && (
+                  <button
+                    onClick={handleOpenReportCreate}
+                    className="px-4 py-2 bg-[#5DB2C7] text-white rounded-lg hover:bg-[#4796a8] transition w-full sm:w-auto text-sm"
+                  >
+                    Create Report
+                  </button>
+                )}
+                {/* View Application button for all 'my' internships (current, completed) */}
+                <button
+                  className="px-4 py-2 bg-[#5DB2C7] text-white rounded-lg hover:bg-[#4796a8] transition w-full sm:w-auto text-sm"
+                  onClick={() => router.push(`/dashboard/student/applied-internships/${internship.id}`)}
+                >
+                  View Application
+                </button>
+              </div>
+            ) : null}
           </div>
         </div>
       </div>
+      {/* Tooltip component instance - only needed if type='applied' might be rendered */}
+      {type === 'applied' && <Tooltip id="status-tooltip" />}
+
+      {/* Upload Documents Modal */}
+      <UploadDocuments
+        open={isUploadModalOpen}
+        onClose={handleCloseUploadModal}
+        internshipId={internship.id}
+      />
+
+      {/* Create Report Modal */}
+      {reportCreate && (
+        <Report
+          isOpen={reportCreate}
+          onClose={handleCloseReportCreate}
+          onAddTile={(data) => {
+            handleCloseReportCreate();
+          }}
+        />
+      )}
     </div>
   );
 }

@@ -34,14 +34,14 @@ export default function CompanyDetailsModal({ open, onClose, companyName, compan
     setFeedback('accepted');
     setTimeout(() => {
       setFeedback(null);
-      onClose && onClose();
+      onClose && onClose(true);
     }, 1400);
   };
   const handleReject = () => {
     setFeedback('rejected');
     setTimeout(() => {
       setFeedback(null);
-      onClose && onClose();
+      onClose && onClose(true);
     }, 1400);
   };
 
@@ -115,7 +115,7 @@ export default function CompanyDetailsModal({ open, onClose, companyName, compan
           {/* Close button - styled like CompanyDetails */}
           <div
             className="absolute top-4 right-4 z-20 flex items-center justify-center w-8 h-8 rounded-full shadow bg-white border border-gray-200 cursor-pointer transition hover:bg-gray-100"
-            onClick={onClose}
+            onClick={() => onClose && onClose(false)}
             role="button"
             tabIndex={0}
           >

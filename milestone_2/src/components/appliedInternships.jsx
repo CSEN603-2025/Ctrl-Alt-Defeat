@@ -1,8 +1,8 @@
 "use client";
 import { useState } from 'react';
-import CardTable from './CardTable';
+import CardTable from './shared/CardTable';
 import DatePicker from './DatePicker';
-import InternshipRow from './InternshipRow';
+import InternshipRow from './shared/InternshipRow';
 import { MOCK_APPLIED_INTERNSHIPS } from '../../constants/mockData';
 import InfoCard from './shared/InfoCard';
 import StatusBadge from './shared/StatusBadge';

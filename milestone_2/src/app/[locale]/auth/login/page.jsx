@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
+import { useDispatch } from 'react-redux';
 import { MOCK_USERS } from '../../../../../constants/mockData';
 import { usersOptions } from '../../../../../constants/index';
 import Link from "next/link";
@@ -15,6 +16,7 @@ import { ToastContainer, toast } from 'react-toastify';
 
 export default function LoginPage() {
   const router = useRouter();
+  const dispatch = useDispatch();
   const searchParams = useSearchParams();
   const userType = searchParams.get('userType');
 
@@ -69,6 +71,15 @@ export default function LoginPage() {
 
     // Store in sessionStorage for current session
     sessionStorage.setItem('userSession', JSON.stringify(userSession));
+
+    // Dispatch Redux action to update auth state
+    dispatch({
+      type: 'LOGIN',
+      payload: {
+        email: values.email,
+        password: values.password
+      }
+    });
 
     // Redirect to appropriate dashboard
     router.push(`/en/dashboard/${userType}`);

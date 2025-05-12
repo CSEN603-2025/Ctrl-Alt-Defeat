@@ -1,6 +1,6 @@
 "use client";
 import React, { useState } from 'react';
-import SearchBar from './SearchBar';
+import SearchBar from './shared/SearchBar';
 import IndustryFilter from './IndustryFilter';
 import CompanyDetails from './CompanyDetails';
 import CompanyDetailsModal from './CompanyDetailsModal';
@@ -48,19 +48,24 @@ export default function CompanyTable({ companies }) {
     setModalCompany(company);
     setModalOpen(true);
   };
-  const handleCloseModal = () => {
+  const handleCloseModal = (actionTaken = false) => {
     setModalOpen(false);
     setModalCompany(null);
+
+    // If an action was taken (accept/reject), also close the sidebar
+    if (actionTaken) {
+      handleCloseSidebar();
+    }
   };
 
   return (
     <div className="flex flex-col items-center w-full min-h-screen">
       {/* Header Section */}
       <div className="w-full max-w-6xl mb-8 mx-auto">
-      <h1 className="text-3xl font-bold mb-0 text-left text-[#2a5f74] relative">
-      Company Applications
-      <span className="absolute bottom-0 left-0 w-16 h-1 bg-[#2a5f74]"></span>
-      </h1>
+        <h1 className="text-3xl font-bold mb-0 text-left text-[#2a5f74] relative">
+          Company Applications
+          <span className="absolute bottom-0 left-0 w-16 h-1 bg-[#2a5f74]"></span>
+        </h1>
 
         {/* Moved Filter Controls Container */}
       </div>

@@ -26,7 +26,7 @@ export default function StudentDetails({ isOpen, studentData }) {
 
   // Get theme colors if available
   const theme = studentData.theme || {
-    primary: "#318FA8",
+    primary: "#318FA8", 
     secondary: "#256980",
     accent: "#41B9D9",
     text: "#1A4857",

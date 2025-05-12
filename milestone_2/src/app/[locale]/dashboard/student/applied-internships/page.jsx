@@ -4,7 +4,7 @@ import { getAppliedInternships } from "../../../../../../constants/internshipDat
 
 export default function AppliedInternshipsPage() {
   return (
-    <div className="container mx-auto px-4 py-8">
+    <div className="container mx-auto px-4 pt-0 pb-8">
       <InternshipList
         title="APPLIED INTERNSHIPS"
         internships={getAppliedInternships()}

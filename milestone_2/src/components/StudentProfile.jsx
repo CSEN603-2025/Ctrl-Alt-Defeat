@@ -1,5 +1,5 @@
 "use client"
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import StudentCard from "./StudentCard";
 import StudentDetails from "./StudentDetails";
 import UpdateProfileS from "./UpdateProfileS";
@@ -9,8 +9,8 @@ export default function Student() {
   const [isDetailsOpen, setIsDetailsOpen] = useState(false);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   
-  // Student profile data maintained in state
-  const [studentData, setStudentData] = useState({
+  // Default student data
+  const defaultStudentData = {
     name: "John Doe",
     handle: "@johndoe",
     bio: "Computer Science student passionate about web development and AI.",
@@ -36,7 +36,7 @@ export default function Student() {
         faculty: "Media Engineering and Technology (MET)",
         semester: 6
       }
-    ],
+    ], 
     skills: ["Java", "Python", "React", "Node.js", "UI/UX Design", "Problem Solving", "Team Leadership"],
     jobInterests: [
       {
@@ -93,8 +93,33 @@ export default function Student() {
         period: "Summer 2023",
         description: "Developed features for an iOS app using Swift. Implemented user authentication and real-time chat functionality."
       }
-    ]
-  });
+    ],
+    theme: {
+      primary: "#318FA8", 
+      secondary: "#256980",
+      accent: "#41B9D9",
+      text: "#1A4857",
+      background: "#E8F4F8"
+    }
+  };
+  
+  // Load student data from localStorage on component mount
+  const [studentData, setStudentData] = useState(defaultStudentData);
+  
+  useEffect(() => {
+    const loadStudentData = () => {
+      try {
+        const savedData = localStorage.getItem('studentProfileData');
+        if (savedData) {
+          setStudentData(JSON.parse(savedData));
+        }
+      } catch (error) {
+        console.error("Error loading student data from localStorage:", error);
+      }
+    };
+    
+    loadStudentData();
+  }, []);
 
   const toggleDetails = () => {
     setIsDetailsOpen(!isDetailsOpen);
@@ -111,6 +136,14 @@ export default function Student() {
   // Function to update student data from edit form
   const handleProfileUpdate = (updatedData) => {
     setStudentData(updatedData);
+    
+    // Save the updated data to localStorage
+    try {
+      localStorage.setItem('studentProfileData', JSON.stringify(updatedData));
+    } catch (error) {
+      console.error("Error saving student data to localStorage:", error);
+    }
+    
     closeEditModal();
     
     // In a real application, you would send the data to your backend here

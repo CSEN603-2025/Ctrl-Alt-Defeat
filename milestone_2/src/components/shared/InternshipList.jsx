@@ -1,8 +1,8 @@
 "use client";
 import { useState } from 'react';
-import CardTable from '../CardTable';
+import CardTable from './CardTable';
 import DatePicker from '../DatePicker';
-import InternshipRow from '../InternshipRow';
+import InternshipRow from './InternshipRow';
 import NoResults from './NoResults';
 
 const statusColors = {
@@ -24,6 +24,9 @@ export default function InternshipList({
   type = "regular", // "regular", "my", "applied"
   statuses = [],
   customFilterPanel,
+  onApplicationCompleted,
+  appliedInternshipIds = new Set(),
+  showDatePicker = true,
 }) {
   const [searchTerm, setSearchTerm] = useState('');
   const [activeTab, setActiveTab] = useState('all');
@@ -49,8 +52,8 @@ export default function InternshipList({
       internship.status?.toLowerCase() === activeTab;
 
     const matchesDate = !selectedDate || (
-      internship.startDate &&
-      new Date(internship.startDate).toDateString() === new Date(selectedDate).toDateString()
+      (type === "applied" && internship.appliedDate && new Date(internship.appliedDate).toDateString() === new Date(selectedDate).toDateString()) ||
+      (type !== "applied" && internship.startDate && new Date(internship.startDate).toDateString() === new Date(selectedDate).toDateString())
     );
 
     // For "applied" type, only show internships with applied statuses
@@ -72,9 +75,9 @@ export default function InternshipList({
   return (
     <div className="w-full px-4 py-6 space-y-4">
       <div className="w-full max-w-3xl mx-auto">
-        {/* First CardTable for Title and Search Bar */}
+        {/* First CardTable for Search Bar only */}
         <CardTable
-          title={title}
+          title=""
           data={[]}
           filterFunction={() => true}
           emptyMessage=""
@@ -90,7 +93,7 @@ export default function InternshipList({
 
         {/* Custom Filter Panel (e.g., All/Recommended) */}
         {customFilterPanel && (
-          <div className="mb-4">{customFilterPanel}</div>
+          <div className="py-2 mb-4">{customFilterPanel}</div>
         )}
 
         {/* Status Tabs and Date Picker Row */}
@@ -113,10 +116,12 @@ export default function InternshipList({
               ))}
             </div>
 
-            <DatePicker
-              selectedDate={selectedDate}
-              onDateChange={setSelectedDate}
-            />
+            {showDatePicker && (
+              <DatePicker
+                selectedDate={selectedDate}
+                onDateChange={setSelectedDate}
+              />
+            )}
           </div>
         )}
 
@@ -140,6 +145,8 @@ export default function InternshipList({
               internship={internship}
               type={type}
               statusColors={statusColors}
+              onApplicationCompleted={onApplicationCompleted}
+              isApplied={appliedInternshipIds.has(internship.id)}
             />
           )}
         />

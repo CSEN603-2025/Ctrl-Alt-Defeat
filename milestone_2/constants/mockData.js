@@ -27,6 +27,7 @@ export const MOCK_USERS = {
       password: "student123",
       name: "Student User",
       role: "student",
+      accountType: "none",
       id: "student_001",
       major: "Computer Science",
       jobInterests: ["Software Engineer", "Backend Developer"],
@@ -41,6 +42,7 @@ export const MOCK_USERS = {
       password: "hatem123",
       name: "Hatem",
       role: "student",
+      accountType: "PRO",
       id: "student_002",
       major: "Media Engineering & Technology",
       jobInterests: ["Frontend Developer", "UI/UX Designer"],
@@ -51,10 +53,11 @@ export const MOCK_USERS = {
       ]
     },
     {
-      email: "salmaaburahma@gmail.com",
+      email: "salmaaburahmah@gmail.com",
       password: "salma123",
       name: "Salma",
       role: "student",
+      accountType: "PRO",
       id: "student_003",
       major: "Computer Science",
       jobInterests: ["UI/UX Designer", "Backend Developer"],
@@ -255,6 +258,7 @@ export const MOCK_APPLIED_INTERNSHIPS = [
     duration: "3 months",
     skills: ["Figma", "User Research", "Prototyping", "UI Design", "Wireframing", "Usability Testing", "Adobe XD"],
     description: "Help design user-friendly interfaces and improve user experience for our products.",
+    details: "Dribble, a leading design platform, offers hands-on experience with real-world design challenges and client projects.",
     requirements: "Design students proficient in Figma with user research experience preferred...",
     status: "pending"
   },
@@ -272,6 +276,7 @@ export const MOCK_APPLIED_INTERNSHIPS = [
     duration: "3 months",
     skills: ["JavaScript", "React", "TypeScript", "Redux", "HTML5", "CSS3", "REST APIs"],
     description: "Join our team to work on exciting projects and gain hands-on experience in frontend development.",
+    details: "TechVision leads in software development, pioneering web technology innovation for over a decade with cutting-edge solutions.",
     requirements: "Applicants should be pursuing a Computer Science degree with basic JavaScript/React knowledge...",
     status: "accepted"
   },
@@ -289,6 +294,7 @@ export const MOCK_APPLIED_INTERNSHIPS = [
     duration: "6 months",
     skills: ["SEO", "Content Creation", "Social Media", "Google Analytics", "Email Marketing", "Copywriting", "Market Research"],
     description: "Assist in marketing campaigns and help boost our brand presence online.",
+    details: "BrandBoost, a premier digital marketing agency, empowers businesses to establish and grow their online presence effectively.",
     requirements: "Marketing/Communications students with social media knowledge and strong writing skills preferred...",
     status: "finalized"
   },
@@ -306,6 +312,7 @@ export const MOCK_APPLIED_INTERNSHIPS = [
     duration: "4 months",
     skills: ["Python", "Machine Learning", "Data Analysis", "SQL", "Pandas", "NumPy", "Data Visualization"],
     description: "Work with our data team to analyze large datasets and derive insights.",
+    details: "Thndr, an innovative fintech startup, transforms the investment landscape using advanced AI-powered analytics and insights.",
     requirements: "Data Science/CS majors with Python proficiency and basic ML understanding needed...",
     status: "rejected"
   }
@@ -348,4 +355,36 @@ export const Students = [
   "Mohamed",
   "Ali",
   "Yasmin"
+]
+
+//Courses by Major:
+
+export const CSEN_Courses = [
+  'Software Engineering',
+  'Databses I',
+  'Databases II',
+  'Introduction to Communication Networks',
+  'Data Structures and Algorithms'
+]
+
+export const DMET_Courses = [
+  'Computer Graphics',
+  'Introduction to Media Engineering',
+  'Web Technologies and Usability',
+  'Visualization and Animation'
+]
+
+export const BioTech_Courses = [
+  'Physiology and Anatomy I',
+  'Physical Chemistry',
+  'General and Pharmaceutical Microbiology',
+  'Physiology and Anatomy II',
+]
+
+export const Law_Courses = [
+  'Introduction to Common Law',
+  'The Constitutional Law',
+  'Criminology and Penology',
+  'Civil Law',
+  'Criminal Law'
 ]

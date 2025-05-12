@@ -1,8 +1,26 @@
 import React, { useState, useEffect } from 'react';
-import { Formik, Form, Field, FieldArray } from 'formik';
+import { Formik, Form, Field, FieldArray, ErrorMessage } from 'formik';
+import * as Yup from 'yup';
 import './styles/StudentProfile.css';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faTimes, faSave, faPlus, faTrash, faCamera, faPalette, faFont, faSquare } from '@fortawesome/free-solid-svg-icons';
+import { faTimes, faSave, faPlus, faTrash, faCamera, faPalette, faFont, faSquare, faExclamationCircle } from '@fortawesome/free-solid-svg-icons';
+
+// Validation schema for student profile form
+const ProfileValidationSchema = Yup.object().shape({
+  name: Yup.string()
+    .required('Name is required')
+    .matches(/^[a-zA-Z\s-]+$/, 'Name can only contain letters, spaces, and hyphens')
+    .min(2, 'Name must be at least 2 characters'),
+  handle: Yup.string()
+    .required('Email is required')
+    .email('Invalid email format. Please enter a valid email address'),
+  bio: Yup.string().max(500, 'Bio cannot exceed 500 characters'),
+  socialLinks: Yup.object().shape({
+    linkedin: Yup.string().url('Invalid URL. Please enter a valid LinkedIn URL').nullable(),
+    github: Yup.string().url('Invalid URL. Please enter a valid GitHub URL').nullable(),
+    portfolio: Yup.string().url('Invalid URL. Please enter a valid portfolio URL').nullable(),
+  }),
+});
 
 export default function UpdateProfileS({ isOpen, onClose, studentData, onProfileUpdate }) {
   const [selectedImage, setSelectedImage] = useState(null);
@@ -155,6 +173,7 @@ export default function UpdateProfileS({ isOpen, onClose, studentData, onProfile
         <Formik
           initialValues={initialValues}
           enableReinitialize={true}
+          validationSchema={ProfileValidationSchema}
           onSubmit={handleSubmit}
         >
           {({ values, setFieldValue, handleChange }) => (
@@ -182,14 +201,17 @@ export default function UpdateProfileS({ isOpen, onClose, studentData, onProfile
                     <div className="form-row">
                       <label htmlFor="name">Full Name</label>
                       <Field type="text" id="name" name="name" />
+                      <ErrorMessage name="name" component="div" className="error-message" />
                     </div>
                     <div className="form-row">
-                      <label htmlFor="handle">Handle</label>
+                      <label htmlFor="handle">Email</label>
                       <Field type="text" id="handle" name="handle" />
+                      <ErrorMessage name="handle" component="div" className="error-message" />
                     </div>
                     <div className="form-row">
                       <label htmlFor="bio">Bio</label>
                       <Field as="textarea" id="bio" name="bio" rows="3" />
+                      <ErrorMessage name="bio" component="div" className="error-message" />
                     </div>
 
                     {/* Color Theme Picker */}
@@ -197,21 +219,26 @@ export default function UpdateProfileS({ isOpen, onClose, studentData, onProfile
                       <label htmlFor="cardColor" className="color-picker-label">
                         <FontAwesomeIcon icon={faPalette} /> Profile Color Theme
                       </label>
-                      <div className="color-picker-wrapper">
-                        <input 
-                          type="color" 
-                          id="cardColor" 
-                          name="cardColor"
-                          value={values.cardColor}
-                          onChange={(e) => {
-                            const newColor = e.target.value;
-                            // Update both cardColor and theme
-                            setFieldValue('cardColor', newColor);
-                            const newTheme = generateColorTheme(newColor);
-                            setFieldValue('theme', newTheme);
-                          }}
-                          className="color-picker-input"
-                        />
+                                            <div className="color-picker-wrapper">
+                        <div className="color-picker-clickable">
+                          <input 
+                            type="color" 
+                            id="cardColor" 
+                            name="cardColor"
+                            value={values.cardColor}
+                            onChange={(e) => {
+                              const newColor = e.target.value;
+                              // Update both cardColor and theme
+                              setFieldValue('cardColor', newColor);
+                              const newTheme = generateColorTheme(newColor);
+                              setFieldValue('theme', newTheme);
+                            }}
+                            className="color-picker-input"
+                          />
+                          <div className="click-indicator">
+                            <span className="click-text">Click to select color</span>
+                          </div>
+                        </div>
                         <div className="theme-preview-container">
                           <div 
                             className="color-preview"
@@ -250,14 +277,17 @@ export default function UpdateProfileS({ isOpen, onClose, studentData, onProfile
                     <div className="form-row">
                       <label htmlFor="linkedin">LinkedIn URL</label>
                       <Field type="text" id="linkedin" name="socialLinks.linkedin" />
+                      <ErrorMessage name="socialLinks.linkedin" component="div" className="error-message" />
                     </div>
                     <div className="form-row">
                       <label htmlFor="github">GitHub URL</label>
                       <Field type="text" id="github" name="socialLinks.github" />
+                      <ErrorMessage name="socialLinks.github" component="div" className="error-message" />
                     </div>
                     <div className="form-row">
                       <label htmlFor="portfolio">Portfolio URL</label>
                       <Field type="text" id="portfolio" name="socialLinks.portfolio" />
+                      <ErrorMessage name="socialLinks.portfolio" component="div" className="error-message" />
                     </div>
                   </div>
 
