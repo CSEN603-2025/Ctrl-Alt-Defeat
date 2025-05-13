@@ -13,10 +13,6 @@ export default function ReportDashboard(){
     const [deleteIndex, setDeleteIndex] = useState(null);
     const [isCreateReportOpen, setIsCreateReportOpen] = useState(false);
 
-    //const handleAddReport = (ReportData) => {
-      //  setReports((prev) => [...prev, ReportData]);
-    //};
-
     const handleAddReport = (newReport) => {
         setReports((prev) => [...prev, newReport]);
     };

@@ -125,7 +125,7 @@ function EvaluationCard({ evaluation, onEdit, onDelete, onView }) {
                             onClick={onEdit}
                             className="bg-[var(--metallica-blue-600)] hover:bg-[var(--metallica-blue-700)] text-white px-3 py-1 rounded-md text-sm transition-colors"
                         >
-                            Edit
+                            Update
                         </button>
                         <button
                             onClick={onDelete}
