@@ -485,20 +485,28 @@ const WorkshopInterface = ({ workshop }) => {
   };
 
   const circularNavStyle = {
-    position: "fixed",
-    bottom: "20px",
-    left: "50%",
-    transform: "translateX(-50%)",
-    display: "flex",
-    justifyContent: "center",
-    alignItems: "center",
-    background: "linear-gradient(90deg, #D9F0F4, #318FA8)",
-    borderRadius: "30px",
-    padding: "10px 25px",
-    boxShadow: "0 4px 12px rgba(0, 0, 0, 0.2)",
-    gap: "15px",
-    zIndex: 100,
-  };
+      position: "fixed",
+      bottom: "22px",
+      left: "50%",
+      transform: "translateX(-50%)",
+      width: "290px",
+      height: "160px",
+      zIndex: 1000,
+      pointerEvents: "none", // so icons float through
+    };
+  
+    const arcBackgroundStyle = {
+      position: "absolute",
+      bottom: 0,
+      left: "50%",
+      transform: "translateX(-50%)",
+      width: "100%",
+      height: "100%",
+      borderTopLeftRadius: "180px",
+      borderTopRightRadius: "180px",
+      background: "linear-gradient(90deg, #D9F0F4, #318FA8)",
+      boxShadow: "0 4px 12px rgba(0, 0, 0, 0.1)",
+    };
 
   const navButtonStyle = {
     padding: "12px",
@@ -884,43 +892,53 @@ return (
 
         {/* Circular Navigation with all icons */}
         <div style={circularNavStyle}>
-          <NavButton 
-            icon={FaMicrophone} 
-            tooltip="Microphone" 
-            onClick={toggleMicrophone} 
-            active={isMicOn} 
-          />
-          <NavButton 
-            icon={FaVideo} 
-            tooltip="Camera" 
-            onClick={toggleCamera} 
-            active={isCameraOn} 
-          />
-          <NavButton 
-            icon={FaDesktop} 
-            tooltip="Share Screen" 
-            onClick={toggleScreenShare} 
-            active={isScreenSharing} 
-          />
-          <NavButton 
-            icon={FaComments} 
-            tooltip="Chat" 
-            onClick={() => setIsChatOpen(!isChatOpen)} 
-            active={isChatOpen}
-          />
-          <NavButton 
-            icon={FaPen} 
-            tooltip="Notes" 
-            onClick={() => setIsNotesOpen(!isNotesOpen)} 
-            active={isNotesOpen}
-          />
-          <NavButton 
-            icon={FaClosedCaptioning} 
-            tooltip="Subtitles" 
-            onClick={() => setShowSubtitles(!showSubtitles)} 
-            active={showSubtitles}
-          />
-        </div>
+  <div style={arcBackgroundStyle}></div>
+
+  {[FaMicrophone, FaVideo, FaDesktop, FaComments, FaPen, FaClosedCaptioning].map((Icon, index, array) => {
+    const total = array.length;
+    const radius = 100; // increase if needed
+    const angle = Math.PI * (index / (total - 1)); // range 0 to π
+    const x = radius * Math.cos(angle);
+    const y = radius * Math.sin(angle);
+
+    return (
+      <div
+        key={index}
+        style={{
+          position: "absolute",
+          left: `calc(50% + ${x}px)`,
+          bottom: `${y}px`,
+          transform: "translate(-50%, 50%)",
+          pointerEvents: "auto",
+          marginBottom: "30px",
+        }}
+      >
+        <NavButton
+          icon={Icon}
+          tooltip={["Mic", "Cam", "Screen", "Chat", "Notes", "Subtitles"][index]}
+          onClick={[
+            toggleMicrophone,
+            toggleCamera,
+            toggleScreenShare,
+            () => setIsChatOpen(!isChatOpen),
+            () => setIsNotesOpen(!isNotesOpen),
+            () => setShowSubtitles(!showSubtitles),
+          ][index]}
+          active={[
+            isMicOn,
+            isCameraOn,
+            isScreenSharing,
+            isChatOpen,
+            isNotesOpen,
+            showSubtitles,
+          ][index]}
+        />
+      </div>
+    );
+  })}
+</div>
+
+
 
         {/* Test Button */}
         <button 
