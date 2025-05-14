@@ -8,6 +8,7 @@ const WorkshopFeedback = ({ isOpen, onClose, workshopTitle, studentName, worksho
   const [feedback, setFeedback] = useState('');
   const [showCertificate, setShowCertificate] = useState(false);
   const [certificateUrl, setCertificateUrl] = useState('');
+  const [error, setError] = useState(null);
 
   const modalStyle = {
     position: 'fixed',
@@ -49,103 +50,67 @@ const WorkshopFeedback = ({ isOpen, onClose, workshopTitle, studentName, worksho
     fontWeight: '500',
   };
 
-  const generateCertificate = async () => {
-    const certificateHtml = `
-      <div id="certificate" style="
-        width: 800px;
-        height: 600px;
-        padding: 40px;
-        background-color: white;
-        position: relative;
-        font-family: 'IBM Plex Sans', sans-serif;
-      ">
-        <div style="
-          position: absolute;
-          top: 0;
-          left: 0;
-          right: 0;
-          bottom: 0;
-          border: 15px solid #318FA8;
-          border-radius: 10px;
-        "></div>
-        <div style="
-          position: relative;
-          z-index: 1;
-          height: 100%;
-          display: flex;
-          flex-direction: column;
-          align-items: center;
-          justify-content: center;
-          text-align: center;
-          padding: 40px;
-        ">
-          <div style="
-            position: absolute;
-            top: 20px;
-            right: 20px;
-            font-size: 14px;
-            color: #2A5F74;
-          ">Date: ${new Date().toLocaleDateString()}</div>
-          <h1 style="
-            font-size: 48px;
-            color: #318FA8;
-            margin-bottom: 30px;
-            font-weight: bold;
-          ">Certificate of Completion</h1>
-          <p style="
-            font-size: 24px;
-            color: #2A5F74;
-            line-height: 1.6;
-            margin-bottom: 40px;
-          ">This is to certify that</p>
-          <h2 style="
-            font-size: 36px;
-            color: #318FA8;
-            margin-bottom: 20px;
-            font-weight: bold;
-          ">${studentName}</h2>
-          <p style="
-            font-size: 24px;
-            color: #2A5F74;
-            line-height: 1.6;
-          ">has successfully completed the workshop:</p>
-          <h3 style="
-            font-size: 30px;
-            color: #318FA8;
-            margin: 20px 0;
-            font-weight: 600;
-          ">${workshopTitle}</h3>
-          <div style="
-            margin-top: 60px;
-            width: 200px;
-            border-top: 2px solid #318FA8;
-            padding-top: 10px;
-            font-style: italic;
-            color: #2A5F74;
-          ">Instructor Signature</div>
-        </div>
-      </div>
-    `;
-
-    const tempDiv = document.createElement('div');
-    tempDiv.innerHTML = certificateHtml;
-    document.body.appendChild(tempDiv);
-
-    const canvas = await html2canvas(tempDiv.firstChild);
-    document.body.removeChild(tempDiv);
-
-    const pdf = new jsPDF({
-      orientation: 'landscape',
-      unit: 'px',
-      format: [800, 600]
-    });
-
-    pdf.addImage(canvas.toDataURL('image/png'), 'PNG', 0, 0, 800, 600);
-    const pdfBlob = pdf.output('blob');
-    const url = URL.createObjectURL(pdfBlob);
-    setCertificateUrl(url);
-    pdf.save(`${workshopTitle}-Certificate.pdf`);
+  const errorStyle = {
+    color: 'red',
+    marginBottom: '15px',
+    textAlign: 'center',
   };
+
+  const generateCertificate = async () => {
+    try {
+      const loadFont = new Promise((resolve) => {
+        const fontLink = document.createElement('link');
+        fontLink.href = 'https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;600;700&display=swap';
+        fontLink.rel = 'stylesheet';
+        fontLink.onload = resolve;
+        fontLink.onerror = resolve;
+        document.head.appendChild(fontLink);
+      });
+  
+      await loadFont;
+      await document.fonts.ready; // Ensure font is loaded
+  
+      const certificateHtml = `<div id="certificate" style="...">...</div>`; // Keep as is
+  
+      const tempDiv = document.createElement('div');
+      tempDiv.style.position = 'fixed';
+      tempDiv.style.top = '0';
+      tempDiv.style.left = '0';
+      tempDiv.style.visibility = 'hidden';
+      tempDiv.innerHTML = certificateHtml;
+      document.body.appendChild(tempDiv);
+  
+      await new Promise((resolve) => setTimeout(resolve, 100));
+  
+      const certElement = tempDiv.querySelector('#certificate');
+      if (!certElement) throw new Error("Certificate element not found.");
+  
+      const canvas = await html2canvas(certElement, {
+        scale: 2,
+        useCORS: true,
+        logging: false,
+      });
+  
+      document.body.removeChild(tempDiv);
+  
+      const pdf = new jsPDF({
+        orientation: 'landscape',
+        unit: 'px',
+        format: [800, 600],
+      });
+  
+      pdf.addImage(canvas.toDataURL('image/png'), 'PNG', 0, 0, 800, 600);
+      const pdfBlob = pdf.output('blob');
+      const url = URL.createObjectURL(pdfBlob);
+      setCertificateUrl(url);
+      pdf.save(`${workshopTitle || 'Sample'}-Certificate.pdf`);
+      setError(null);
+    } catch (err) {
+      console.error('Error generating certificate:', err);
+      setError('Failed to generate certificate. Please try again.');
+    }
+  };
+  
 
   const handleSubmit = () => {
     if (rating === 0) {
@@ -153,6 +118,7 @@ const WorkshopFeedback = ({ isOpen, onClose, workshopTitle, studentName, worksho
       return;
     }
     setShowCertificate(true);
+    generateCertificate();
   };
 
   const viewCertificate = () => {
@@ -239,12 +205,13 @@ const WorkshopFeedback = ({ isOpen, onClose, workshopTitle, studentName, worksho
             <p style={{ marginBottom: '30px', color: '#2A5F74' }}>
               You can now download your certificate of attendance.
             </p>
+            {error && <p style={errorStyle}>{error}</p>}
             <div style={{ display: 'flex', justifyContent: 'center', gap: '15px' }}>
               <button onClick={generateCertificate} style={buttonStyle}>
                 <FaDownload /> Download Certificate
               </button>
               {certificateUrl && (
-                <button onClick={viewCertificate} style={{...buttonStyle, background: '#2A5F74'}}>
+                <button onClick={viewCertificate} style={{ ...buttonStyle, background: '#2A5F74' }}>
                   <FaEye /> View Certificate
                 </button>
               )}
