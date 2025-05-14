@@ -118,15 +118,18 @@ const AssessmentSidebar = ({ assessment, onClose }) => {
                   <div className="flex justify-center gap-8 mt-2">
                     {likertOptions.map(option => (
                       <div key={option.id} className="flex flex-col items-center">
-                        <div
-                          className={`w-12 h-12 rounded-full flex items-center justify-center mb-1
-                            ${answers[index] === option.id
-                              ? option.selected + ' border-2'
-                              : option.color + ' border'}
-                            transition-all duration-200 cursor-pointer
-                          `}
-                          onClick={() => handleAnswerChange(index, option.id)}
-                        />
+                      <motion.div
+                        whileTap={{ scale: 0.9 }}
+                        animate={answers[index] === option.id ? { scale: 1.15 } : { scale: 1 }}
+                        transition={{ type: 'spring', stiffness: 250, damping: 18 }}
+                        onClick={() => handleAnswerChange(index, option.id)}
+                        className={`w-10 h-10 rounded-full flex items-center justify-center mb-1
+                          ${answers[index] === option.id
+                            ? option.selected + ' border-[3px] shadow-md'
+                            : option.color + ' border'}
+                          cursor-pointer transition-all duration-300
+                        `}
+                      />
                         <span className="text-xs text-gray-600 text-center w-16">{option.text}</span>
                       </div>
                     ))}
