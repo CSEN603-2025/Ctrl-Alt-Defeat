@@ -156,7 +156,7 @@ const WorkshopFeedback = ({ isOpen, onClose, workshopTitle, studentName, worksho
                       background: 'none',
                       border: 'none',
                       fontSize: '24px',
-                      color: star <= rating ? '#318FA8' : '#D9F0F4',
+                      color: star <= rating ? '#e2dd55' : '#D9F0F4',
                       cursor: 'pointer',
                     }}
                   >
@@ -175,7 +175,7 @@ const WorkshopFeedback = ({ isOpen, onClose, workshopTitle, studentName, worksho
                 minHeight: '120px',
                 padding: '12px',
                 borderRadius: '8px',
-                border: '2px solid #318FA8',
+                border: '2px solid #2A5F74',
                 marginBottom: '20px',
                 resize: 'vertical',
               }}
