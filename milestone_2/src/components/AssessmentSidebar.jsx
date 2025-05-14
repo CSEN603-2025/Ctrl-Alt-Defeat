@@ -127,16 +127,16 @@ const AssessmentSidebar = ({ assessment, onClose }) => {
                       }}
                       animate={answers[index] === option.id ? { scale: 1.15, borderWidth: '3px', boxShadow: '0 2px 6px rgba(0, 0, 0, 0.1)' } : { scale: 1 }}
                       transition={{ type: 'spring', stiffness: 250, damping: 18 }}
-                      onClick={() => handleAnswerChange(index, option.id)}
-                      className={`w-10 h-10 rounded-full flex items-center justify-center mb-1
-                        ${answers[index] === option.id
-                          ? option.selected + ' border-[3px] shadow-md'
-                          : option.color + ' border'}
-                        cursor-pointer transition-all duration-300
-                      `}
-                    />
-                    <span className="text-xs text-gray-600 text-center w-16">{option.text}</span>
-                  </div>
+                          onClick={() => handleAnswerChange(index, option.id)}
+                          className={`w-8 h-8 rounded-full flex items-center justify-center mb-1
+                            ${answers[index] === option.id
+                              ? option.selected + ' border-[3px] shadow-md'
+                              : option.color + ' border'}
+                            cursor-pointer transition-all duration-100 ease-in-out // Faster transition
+                          `}
+                        />
+                        <span className="text-[10px] text-gray-600 text-center w-16">{option.text}</span>
+                      </div>
                 ))}
                   </div>
                 </div>
