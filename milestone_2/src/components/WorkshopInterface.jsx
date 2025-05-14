@@ -232,7 +232,7 @@ const WorkshopInterface = ({ workshop }) => {
 
   const participantsGridStyle = {
     display: "flex",
-    justifyContent: "flex-end",
+    justifyContent: "right",
     alignItems: "center",
     padding: "10px",
     width: "100%",
@@ -305,7 +305,6 @@ const WorkshopInterface = ({ workshop }) => {
     display: 'flex',
     flexDirection: 'column',
     padding: 0,
-    borderRadius: '10px', // Added for rounded corners
   };
 
   const notesPanelStyle = {
@@ -322,7 +321,6 @@ const WorkshopInterface = ({ workshop }) => {
     display: 'flex',
     flexDirection: 'column',
     padding: '20px',
-    borderRadius: '10px', // Added for rounded corners
   };
 
   const videoPlaceholderStyle = {
@@ -606,9 +604,71 @@ const WorkshopInterface = ({ workshop }) => {
     </button>
   );
 
+  const VideoControls = () => {
+    if (!isClient) return null;
+    
+    return (
+      <div style={controlsContainerStyle}>
+        {/* Subtitles container (replacing participant panel) */}
+        <div style={{
+          width: "190px",
+          height: "120px",
+          padding: '8px',
+          background: showSubtitles ? 'white' : 'transparent',
+          borderRadius: '10px',
+          border: showSubtitles ? '1px solid #318FA8' : 'none',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          color: '#2A5F74',
+          transition: 'all 0.3s ease-in-out',
+          opacity: showSubtitles ? 1 : 0,
+          visibility: showSubtitles ? 'visible' : 'hidden',
+          overflow: 'hidden',
+        }}>
+          {showSubtitles && (
+            <p style={{ 
+              margin: 0, 
+              padding: '4px', 
+              textAlign: 'center',
+              fontSize: '13px',
+              width: '100%',
+              overflow: 'hidden',
+              textOverflow: 'ellipsis',
+              display: '-webkit-box',
+              WebkitLineClamp: 3,
+              WebkitBoxOrient: 'vertical',
+              wordWrap: 'break-word',
+            }}>
+              Live subtitles will appear here...
+            </p>
+          )}
+        </div>
+
+        {/* Participant rectangle (replacing end workshop button position) */}
+        <div style={participantsGridStyle}>
+          <div style={{
+            ...participantStyle,
+            width: "190px",
+            height: "120px",
+          }}>
+            <Image 
+              src="/images/default-avatar.png"
+              alt="Default Avatar"
+              width={24}
+              height={24}
+              style={avatarStyle}
+            />
+            <span style={participantNameStyle}>John Doe</span>
+          </div>
+        </div>
+      </div>
+    );
+  };
+
   const controlsContainerStyle = {
     display: "grid",
-    gridTemplateColumns: "200px 1fr 250px", // Subtitles left, video center, participant right
+    gridTemplateColumns: "195px 1fr 200px",
     gap: "15px",
     alignItems: "center",
     width: "100%",
@@ -801,57 +861,7 @@ return (
                 style={{ width: "100%", height: "100%", objectFit: "cover" }}
               />
             </div>
-            <div style={controlsContainerStyle}>
-              {/* Subtitles on the left */}
-              <div style={{
-                width: "200px",
-                height: "120px",
-                padding: '8px',
-                background: showSubtitles ? 'white' : 'transparent',
-                borderRadius: '10px',
-                border: showSubtitles ? '1px solid #318FA8' : 'none',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                color: '#2A5F74',
-                transition: 'all 0.3s ease-in-out',
-                opacity: showSubtitles ? 1 : 0,
-                visibility: showSubtitles ? 'visible' : 'hidden',
-                overflow: 'hidden',
-              }}>
-                {showSubtitles && (
-                  <p style={{ 
-                    margin: 0, 
-                    padding: '4px', 
-                    textAlign: 'center',
-                    fontSize: '13px',
-                    width: '100%',
-                    overflow: 'hidden',
-                    textOverflow: 'ellipsis',
-                    display: '-webkit-box',
-                    WebkitLineClamp: 3,
-                    WebkitBoxOrient: 'vertical',
-                    wordWrap: 'break-word',
-                  }}>
-                    Live subtitles will appear here...
-                  </p>
-                )}
-              </div>
-
-              {/* Participant panel on the right */}
-              <div style={participantsGridStyle}>
-                <div style={participantStyle}>
-                  <Image 
-                    src="/images/default-avatar.png"
-                    alt="Default Avatar"
-                    width={24}
-                    height={24}
-                    style={avatarStyle}
-                  />
-                  <span style={participantNameStyle}>John Doe</span>
-                </div>
-              </div>
-            </div>
+            <VideoControls />
           </div>
         </div>
 
@@ -936,7 +946,7 @@ return (
             isOpen={showFeedback}
             onClose={() => setShowFeedback(false)}
             workshopTitle={workshop?.title || 'Workshop'}
-            studentName="John Doe" // Replace with actual student name
+            studentName="John Doe"
             workshopEnded={workshopEnded}
           />
         )}
