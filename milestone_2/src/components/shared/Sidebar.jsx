@@ -73,6 +73,7 @@ export default function Sidebar({ userType, onViewChange, currentView }) {
   const [isExpanded, setIsExpanded] = useState(true);
   const [isMobile, setIsMobile] = useState(false);
   const [prevView, setPrevView] = useState(currentView);
+  const [hoveredItem, setHoveredItem] = useState(null); // Track hovered item
   const pathname = usePathname();
   const router = useRouter();
   const dispatch = useDispatch();
@@ -91,19 +92,13 @@ export default function Sidebar({ userType, onViewChange, currentView }) {
   useEffect(() => {
     const checkMobile = () => {
       setIsMobile(window.innerWidth < 768);
-      // Auto-collapse on mobile
       if (window.innerWidth < 768) {
         setIsExpanded(false);
       }
     };
 
-    // Set on first load
     checkMobile();
-
-    // Add event listener for window resize
     window.addEventListener('resize', checkMobile);
-
-    // Cleanup
     return () => window.removeEventListener('resize', checkMobile);
   }, []);
 
@@ -117,53 +112,58 @@ export default function Sidebar({ userType, onViewChange, currentView }) {
 
   const toggleSidebar = () => {
     setIsExpanded(!isExpanded);
+    setHoveredItem(null); // Clear hover state on toggle
   };
 
-  // Handle view change with auto-collapse
   const handleViewChange = (itemId) => {
-    // Call the parent's onViewChange
     if (onViewChange) {
       onViewChange(itemId);
     }
-
-    // Auto-collapse sidebar after navigation
     setIsExpanded(false);
+    setHoveredItem(null); // Clear hover state on navigation
   };
 
-  // Determine active item based on current pathname or view
   const getIsActive = (item) => {
     if (item.isPage) {
-      // For path-based navigation, compare with pathname
       return pathname === item.path || pathname.startsWith(item.path + '/');
     } else if (onViewChange) {
-      // For view-based navigation, compare with currentView
       return currentView === item.id;
     }
     return false;
   };
 
-  // Handle logout
   const handleLogout = () => {
     dispatch({ type: LOGOUT_USER });
 
-    // Clear session and local storage
     if (typeof window !== 'undefined') {
       sessionStorage.removeItem('userSession');
       localStorage.removeItem('userSession');
-      sessionStorage.removeItem('welcomeShown'); // Also clear welcomeShown flag
+      sessionStorage.removeItem('welcomeShown');
     }
 
     router.push(`/${locale}/`);
+    setHoveredItem(null); // Clear hover state on logout
+  };
+
+  const handleMouseEnter = (itemId) => {
+    console.log(`Mouse entered: ${itemId}, isExpanded: ${isExpanded}`);
+    if (!isExpanded) {
+      setHoveredItem(itemId);
+    }
+  };
+
+  const handleMouseLeave = (itemId) => {
+    console.log(`Mouse left: ${itemId}`);
+    setHoveredItem(null);
   };
 
   return (
     <div
-      className={`bg-[#E2F4F7] h-screen flex flex-col border-r border-[#5DB2C7] sticky top-0 transform transition-all duration-300 ease-in-out ${isExpanded ? 'w-64' : 'w-20'}`}
+      className={`bg-[#E2F4F7] h-screen flex flex-col border-r border-[#5DB2C7] sticky top-0 transform transition-all duration-300 ease-in-out ${isExpanded ? 'w-64' : 'w-20'} overflow-visible`}
       style={{ boxShadow: '0 4px 12px rgba(0, 0, 0, 0.05)' }}
     >
       {/* Sidebar Header */}
       <div className="p-3 border-b border-[#5DB2C7] flex items-center justify-between">
-        {/* Logo and Optional Portal Text */}
         <div className={`flex items-center transition-all duration-300 ease-in-out ${isExpanded ? 'justify-start' : 'justify-center flex-grow'}`}>
           <Image
             src="/logos/internhub-logo.png"
@@ -179,8 +179,6 @@ export default function Sidebar({ userType, onViewChange, currentView }) {
             <span className="text-[#2a5f74]">Hub</span>
           </div>
         </div>
-
-        {/* Toggle Button */}
         <button
           onClick={toggleSidebar}
           className="text-[#5DB2C7] hover:bg-[#D9F0F4] p-2 rounded-full transition-all duration-300 hover:scale-105 ml-2 flex-shrink-0"
@@ -195,11 +193,12 @@ export default function Sidebar({ userType, onViewChange, currentView }) {
       </div>
 
       {/* Sidebar Content (Navigation Items) */}
-      <div className="flex-1 overflow-y-auto pt-2 overflow-x-hidden">
+      <div className="flex-1 pt-2">
         <ul className="space-y-1 px-2">
           {localizedItems.map(item => {
             const isActive = getIsActive(item);
             const icon = iconMap[item.iconId] || faHome;
+            const isHovered = hoveredItem === item.id;
 
             const commonClasses = "w-full flex items-center p-3 rounded-lg transition-all duration-300 ease-in-out text-sm";
             const activeClasses = "bg-[#D9F0F4] text-[#2a5f74] border-2 border-[#3298BA] shadow-md";
@@ -207,17 +206,47 @@ export default function Sidebar({ userType, onViewChange, currentView }) {
             const alignmentClass = isExpanded ? "justify-start" : "justify-center";
 
             const itemContent = (
-              <>
+              <div
+                style={{ position: 'relative', display: 'flex', alignItems: 'center' }}
+                onMouseEnter={() => handleMouseEnter(item.id)}
+                onMouseLeave={() => handleMouseLeave(item.id)}
+              >
                 <span className={`flex-shrink-0 flex items-center ${isExpanded ? 'w-6' : 'w-auto'} justify-center`}>
                   <FontAwesomeIcon icon={icon} size="lg" className={`transition-all duration-300 ease-in-out ${isActive ? 'text-[#3298BA]' : 'text-[#2a5f74]'}`} />
                 </span>
                 <span
-                  className={`whitespace-nowrap overflow-hidden transition-all duration-300 ease-in-out ${isExpanded ? 'ml-3 opacity-100 max-w-[150px]' : 'ml-0 opacity-0 max-w-0'
-                    }`}
+                  className={`whitespace-nowrap overflow-hidden transition-all duration-300 ease-in-out ${isExpanded ? 'ml-3 opacity-100 max-w-[150px]' : 'ml-0 opacity-0 max-w-0'}`}
                 >
                   {item.label}
                 </span>
-              </>
+                {!isExpanded && isHovered && (
+                  <span
+                    style={{
+                      position: 'absolute',
+                      left: '70px',
+                      top: '50%',
+                      transform: 'translateY(-50%)',
+                      backgroundColor: '#D9F0F4',
+                      color: '#2a5f74',
+                      padding: '6px 12px',
+                      borderRadius: '6px',
+                      fontSize: '12px',
+                      fontWeight: '500',
+                      whiteSpace: 'nowrap',
+                      boxShadow: '0 2px 8px rgba(0, 0, 0, 0.1)',
+                      zIndex: 2000,
+                      maxWidth: '200px',
+                      overflow: 'hidden',
+                      textOverflow: 'ellipsis',
+                      border: '1px solid #5DB2C7', // Debugging border
+                      opacity: 1,
+                      transition: 'opacity 0.2s ease-in-out'
+                    }}
+                  >
+                    {item.label}
+                  </span>
+                )}
+              </div>
             );
 
             if (item.isPage) {
@@ -226,7 +255,7 @@ export default function Sidebar({ userType, onViewChange, currentView }) {
                   <Link
                     href={item.path}
                     className={`${commonClasses} ${alignmentClass} ${isActive ? activeClasses : inactiveClasses}`}
-                    onClick={() => !isExpanded && setIsExpanded(false)} // Keep expanded if clicking on mobile for views, collapse for pages
+                    onClick={() => !isExpanded && setIsExpanded(false)}
                   >
                     {itemContent}
                   </Link>
@@ -236,7 +265,7 @@ export default function Sidebar({ userType, onViewChange, currentView }) {
               return (
                 <li key={item.id}>
                   <button
-                    onClick={() => handleViewChange(item.id)} // handleViewChange already collapses sidebar
+                    onClick={() => handleViewChange(item.id)}
                     className={`${commonClasses} ${alignmentClass} ${isActive ? activeClasses : inactiveClasses}`}
                   >
                     {itemContent}
@@ -268,16 +297,49 @@ export default function Sidebar({ userType, onViewChange, currentView }) {
             }}
           />
         ) : (
-          <button
-            onClick={handleLogout}
-            className="p-2.5 rounded-full flex items-center justify-center transition-all duration-300 ease-in-out hover:bg-red-700/20"
-            style={{ color: '#e74c3c' }}
-            aria-label="Logout"
+          <div
+            style={{ position: 'relative', display: 'flex', alignItems: 'center' }}
+            onMouseEnter={() => handleMouseEnter('logout')}
+            onMouseLeave={() => handleMouseLeave('logout')}
           >
-            <FontAwesomeIcon icon={faRightFromBracket} size="lg" />
-          </button>
+            <button
+              onClick={handleLogout}
+              className="p-2.5 rounded-full flex items-center justify-center transition-all duration-300 ease-in-out hover:bg-red-700/20"
+              style={{ color: '#e74c3c' }}
+              aria-label="Logout"
+            >
+              <FontAwesomeIcon icon={faRightFromBracket} size="lg" />
+            </button>
+            {hoveredItem === 'logout' && (
+              <span
+                style={{
+                  position: 'absolute',
+                  left: '70px',
+                  top: '50%',
+                  transform: 'translateY(-50%)',
+                  backgroundColor: '#D9F0F4',
+                  color: '#2a5f74',
+                  padding: '6px 12px',
+                  borderRadius: '6px',
+                  fontSize: '12px',
+                  fontWeight: '500',
+                  whiteSpace: 'nowrap',
+                  boxShadow: '0 2px 8px rgba(0, 0, 0, 0.1)',
+                  zIndex: 2000,
+                  maxWidth: '200px',
+                  overflow: 'hidden',
+                  textOverflow: 'ellipsis',
+                  border: '1px solid #5DB2C7', // Debugging border
+                  opacity: 1,
+                  transition: 'opacity 0.2s ease-in-out'
+                }}
+              >
+                Logout
+              </span>
+            )}
+          </div>
         )}
       </div>
     </div>
   );
-} 
+}
