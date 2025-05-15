@@ -2,7 +2,7 @@
 import { useState } from "react";
 import WorkshopCard from "./WorkshopCard";
 import WorkshopSidebar from "./WorkshopSidebar";
-import { sampleWorkshops } from "../constants/mockData";
+import { sampleWorkshops } from "../../constants/mockData";
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faPlus } from '@fortawesome/free-solid-svg-icons';
 

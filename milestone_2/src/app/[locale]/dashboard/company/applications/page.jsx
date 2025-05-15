@@ -1,7 +1,7 @@
 "use client";
 
 import React from "react";
-import ApplicationsList from "@/components/company/ApplicationsList";
+import ApplicationsList from "../../../../../components/ApplicationsList";
 
 export default function CompanyApplicationsPage() {
   return (

@@ -175,19 +175,43 @@ export default function InternshipList({
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 py-2 mb-4">
               {/* Status Tabs */}
               <div className="flex flex-wrap gap-2">
-                {['all', ...displayStatuses].map((tab) => (
-                  <button
-                    key={tab}
-                    onClick={() => setActiveTab(tab)}
-                    className={`px-4 py-2 rounded-full text-sm font-medium transition-colors
-                      ${activeTab === tab
-                        ? 'bg-[#D9F0F4] text-[#2a5f74] border-2 border-[#3298BA]'
-                        : 'bg-white text-gray-600 border border-gray-300 hover:bg-gray-50'
-                      }`}
-                  >
-                    {tab === 'all' ? 'All' : tab.charAt(0).toUpperCase() + tab.slice(1)}
-                  </button>
-                ))}
+                {['all', ...displayStatuses].map((tab) => {
+  const isActive = activeTab === tab;
+
+  // You can define hover styles manually if needed
+  const hoverStyles = {
+    pending: 'hover:bg-yellow-100 hover:text-yellow-800 hover:border-yellow-400',
+    accepted: 'hover:bg-green-100 hover:text-green-800 hover:border-green-400',
+    finalized: 'hover:bg-purple-100 hover:text-purple-800 hover:border-purple-400',
+    rejected: 'hover:bg-red-100 hover:text-red-800 hover:border-red-400',
+    current: 'hover:bg-blue-100 hover:text-blue-800 hover:border-blue-400',
+    completed: 'hover:bg-green-100 hover:text-green-800 hover:border-green-400',
+    evaluated: 'hover:bg-purple-100 hover:text-purple-800 hover:border-purple-400',
+  };
+
+  const activeStyles = {
+    pending: 'bg-yellow-100 text-yellow-800 border-yellow-400',
+    accepted: 'bg-green-100 text-green-800 border-green-400',
+    finalized: 'bg-purple-100 text-purple-800 border-purple-400',
+    rejected: 'bg-red-100 text-red-800 border-red-400',
+    current: 'bg-blue-100 text-blue-800 border-blue-400',
+    completed: 'bg-green-100 text-green-800 border-green-400',
+    evaluated: 'bg-purple-100 text-purple-800 border-purple-400',
+  };
+
+  return (
+    <button
+      key={tab}
+      onClick={() => setActiveTab(tab)}
+      className={`px-4 py-2 rounded-full text-sm font-medium transition-colors border
+        ${isActive
+          ? activeStyles[tab] ?? 'bg-[#D9F0F4] text-[#2a5f74] border-[#3298BA]'
+          : `bg-white text-gray-600 border-gray-300 ${hoverStyles[tab] ?? 'hover:bg-gray-50'}`}`}
+    >
+      {tab === 'all' ? 'All' : tab.charAt(0).toUpperCase() + tab.slice(1)}
+    </button>
+  );
+})}
               </div>
 
               {showDatePicker && (
