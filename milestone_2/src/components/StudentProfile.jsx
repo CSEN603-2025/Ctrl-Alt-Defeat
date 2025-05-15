@@ -14,6 +14,8 @@ export default function Student() {
     name: "Salma Soliman",
     email: "SalmaSoliman@student.guc.edu.eg",
     bio: "Computer Science student passionate about web development and AI.",
+    major: "Computer Science and Engineering",
+    year: "Spring 2027",
     profileImage: "/images/girl1.png",
     socialLinks: {
       linkedin: "https://linkedin.com/in/johndoe",

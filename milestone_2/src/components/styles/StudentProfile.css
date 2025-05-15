@@ -19,7 +19,7 @@
   z-index: 1;
   opacity: 0;
   transform: translateX(-50%);
-  background-color: #fff;
+  background-color: #ffffff;
   box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
   overflow: hidden;
   max-height: 80%;
@@ -35,7 +35,7 @@
   left: 65%;
   transform: translateX(-38%);
   pointer-events: all;
-  padding: 0 10px ;
+  padding: 0 10px;
 }
 
 .student-card {
@@ -50,13 +50,12 @@
   border-radius: 20px;
   overflow: hidden;
   box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
-  background: white;
+  background: #FFFFFF;
   left: 50%;
   transform: translateX(-50%);
   transform-origin: center left;
-  background: #F0F9FB;
   border: 3px solid #318FA8;
-  border-radius: 1rem; /* Optional: gives it a softer look */
+  border-radius: 1rem;
 }
 
 /* Call to action for student card */
@@ -68,7 +67,7 @@
   transform: translateX(-50%);
   background-color: var(--user-secondary);
   color: white;
-  border-radius: 1rem; /* Optional: gives it a softer look */
+  border-radius: 1rem;
   padding: 6px 15px;
   border-radius: 20px;
   font-size: 0.85rem;
@@ -112,102 +111,143 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: center;
+  justify-content: flex-start;
   padding: 1rem;
-  background: #F0F9FB;
+  margin-top: 2rem;
+  background: #FFFFFF;
+  min-height: 200px;
+}
+
+.card-top .edit-profile-button {
+  margin-bottom: 1rem;
 }
 
 .card-top .profile-image-container {
   display: flex;
   justify-content: center;
   align-items: center;
-  margin-bottom: 1rem;
+  margin-top: 1.5rem;
 }
 
 .card-top .profile-image {
-  width: 100px;
-  height: 100px;
+  width: 150px;
+  height: 150px;
   object-fit: cover;
+  background: #FFFFFF;
   border-radius: 50%;
-  border: 2px solid var(--user-primary);
-  margin-top: 8rem;
-}
-
-.card-top .edit-profile-button {
-  margin-top: 0.5rem;
+  margin-top: 0.5px;
+  border: 4px solid var(--user-primary);
 }
 
 .card-content {
   text-align: center;
-  padding: 1rem;
-}
-
-
-/*.card-top {
-  height: 45%;
-  width: 100%;
-  background: linear-gradient(135deg, var(--metallica-blue-300) 0%, var(--metallica-blue-600) 100%);
-  border-bottom-left-radius: 30px;
-  border-bottom-right-radius: 30px;
-  position: relative;
-  display: flex;
-  justify-content: center;
-}
-
-.profile-image-container {
-  position: absolute;
-  bottom: -50px;
-  width: 100px;
-  height: 100px;
-  border-radius: 50%;
-  background: #F0F9FB; /* Soft blue background 
-  padding: 6px;        /* Slightly more padding for the ring effect 
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
-  border: 2.5px solid #3298BA; /* Blue border ring 
-  transition: all 0.3s ease;
-}
-
-.profile-image {
-  width: 88px;
-  height: 88px;
-  border-radius: 50%;
-  object-fit: cover;
-  background: #F0F9FB; /* fallback background 
-  box-shadow: 0 2px 8px rgba(50, 152, 186, 0.10);
-}*/
-
-/*.card-content {
-  padding: 60px 25px 25px;
+  padding: 0.5rem;
+  flex-grow: 1;
   display: flex;
   flex-direction: column;
   align-items: center;
-  flex: 1;
-}*/
+  justify-content: flex-start;
+}
 
 .student-name {
   font-size: 1.6rem;
   font-weight: 600;
-  color: #333;
-  margin-bottom: 5px;
-  text-align: center;
+  color: var(--user-text);
+  margin-bottom: 0.5rem;
 }
 
-.student-handle {
-  color: #999;
+
+.quote-mark {
+  color: var(--user-secondary);
+  font-size: 1.5rem;
+  position: absolute;
+}
+
+.quote-mark:first-child {
+  left: 0;
+  top: -0.5rem;
+}
+
+.quote-mark:last-child {
+  right: 0;
+  bottom: -0.5rem;
+}
+
+.student-bio {
   font-size: 0.9rem;
-  margin-bottom: 20px;
-  text-align: center;
+  line-height: 1.5;
+  color: var(--user-text);
+  margin-bottom: 0.5rem; /* Standardized to 0.5rem above the line */
+  position: relative;
+  padding: 0 1rem;
+}
+
+.student-info-section {
+  margin-bottom: 0.5rem; /* Standardized to 0.5rem below the last section */
+  margin-top: 0.5rem; /* Standardized to 0.5rem above the line */
+  position: relative;
+}
+
+.student-info-section::before {
+  content: "";
+  position: absolute;
+  top: -0.5rem; /* Positioned 0.5rem above the section */
+  left: 50%;
+  transform: translateX(-50%);
+  width: 80%;
+  height: 1px; /* Standardized thickness */
+  background: #318FA8;
+  border-radius: 1px;
+}
+
+.student-info-section .section-value {
+  font-size: 0.9rem; /* Kept from previous adjustment */
+  margin-bottom: 1rem; /* Standardized to 0.5rem above the line */
+  position: relative;
+}
+
+.student-info-section .section-value:last-child {
+  margin-bottom: 0.5rem; /* Standardized to 0.5rem above the social links line */
 }
 
 .social-links {
   display: flex;
   gap: 15px;
   justify-content: center;
-  margin-bottom: 8px;
+  margin-top: 0.5rem; /* Standardized to 0.5rem above the line */
+  position: relative;
 }
+
+.social-links::before {
+  content: "";
+  position: absolute;
+  top: -0.5rem; /* Positioned 0.5rem above the social links */
+  left: 50%;
+  transform: translateX(-50%);
+  width: 80%;
+  height: 1px; /* Standardized thickness */
+  background: #318FA8;
+  border-radius: 1px;
+}
+
+.student-info-section .section-title {
+  font-size: 0.95rem; /* Increased from 0.9rem for better readability */
+  margin-bottom: 0.3rem;
+}
+
+.student-info-section .section-value:not(:last-child)::after {
+  content: "";
+  position: absolute;
+  bottom: -0.5rem; /* Adjusted from -0.4rem to match increased margin-bottom */
+  left: 50%;
+  transform: translateX(-50%);
+  width: 60%; /* Slightly shorter than the main separator */
+  height: 1px;
+  background: #318FA8;
+  border-radius: 1px;
+  opacity: 0.5; /* Slightly lighter for hierarchy */
+}
+
 
 .social-icon {
   width: 24px;
@@ -220,39 +260,13 @@
   opacity: 1;
 }
 
-.student-bio {
-  text-align: center;
-  font-size: 0.9rem;
-  line-height: 1.5;
-  color: #666;
-  margin-bottom: 25px;
-}
-
-.student-workplace {
-  text-align: center;
-  font-size: 0.95rem;
-  font-weight: 500;
-  color: #333;
-  margin-top: auto;
-}
-
-.card-bottom-wave {
-  position: absolute;
-  bottom: 0;
-  left: 0;
-  width: 100%;
-  height: 40px;
-  opacity: 0.2;
-}
-
 .student-card.active {
-  background-color: white;
+  background-color: #FFFFFF;
   box-shadow: 0 15px 35px rgba(0, 0, 0, 0.15);
   left: 25%;
   transform: translateX(-50%);
-  background: #F0F9FB;
   border: 3px solid #318FA8;
-  border-radius: 1rem; /* Optional: gives it a softer look */
+  border-radius: 1rem;
 }
 
 .student-profile {

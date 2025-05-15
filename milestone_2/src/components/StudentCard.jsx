@@ -6,7 +6,6 @@ export default function StudentCard({ isOpen, toggleDetails, onEditProfile, stud
   // Function to generate a gradient based on the selected color
   const generateGradient = (baseColor) => {
     if (!baseColor) return "linear-gradient(135deg, var(--metallica-blue-300) 0%, var(--metallica-blue-600) 100%)";
-    
     try {
       // Convert hex to RGB
       const r = parseInt(baseColor.slice(1, 3), 16);
@@ -26,7 +25,7 @@ export default function StudentCard({ isOpen, toggleDetails, onEditProfile, stud
 
   // Get background gradient based on student's color preference
   const cardBackgroundGradient = generateGradient(studentData.cardColor);
-  
+
   // Get theme colors if available
   const theme = studentData.theme || {
     primary: "#318FA8",
@@ -46,40 +45,24 @@ export default function StudentCard({ isOpen, toggleDetails, onEditProfile, stud
   };
 
   // Text styles based on theme
-  const nameStyle = {
-    color: theme.text
-  };
-  
-  const handleStyle = {
-    color: theme.secondary
-  };
-  
-  const bioStyle = {
-    color: theme.text
-  };
-  
-  const socialIconStyle = {
-    color: theme.primary
-  };
+  const nameStyle = { color: theme.text };
+  const handleStyle = { color: theme.secondary };
+  const bioStyle = { color: theme.text };
+  const sectionTitleStyle = { color: theme.secondary };
+  const sectionValueStyle = { color: theme.text };
+  const socialIconStyle = { color: theme.primary };
 
   return (
-    <div 
-      className={`student-card ${isOpen ? 'active' : ''}`} 
+    <div
+      className={`student-card ${isOpen ? 'active' : ''}`}
       onClick={toggleDetails}
       style={themeStyle}
     >
-      <div 
+      <div
         className="card-top"
-        style={{ background: "#F0F9FB" }} // Remove the blue gradient, set to plain white
+        style={{ background: "#FFFFFF" }}
       >
-        <div className="profile-image-container">
-          <img 
-            src={studentData.profileImage} 
-            alt="Student profile" 
-            className="profile-image"
-          />
-        </div>
-        <button 
+        <button
           className="edit-profile-button"
           onClick={(e) => {
             e.stopPropagation(); // Prevent triggering card click
@@ -88,11 +71,27 @@ export default function StudentCard({ isOpen, toggleDetails, onEditProfile, stud
         >
           <FontAwesomeIcon icon={faEdit} /> Edit Profile
         </button>
+        <div className="profile-image-container">
+          <img
+            src={studentData.profileImage}
+            alt="Student profile"
+            className="profile-image"
+          />
+        </div>
       </div>
       <div className="card-content">
         <h2 className="student-name" style={nameStyle}>{studentData.name}</h2>
-        <p className="student-handle" style={handleStyle}>{studentData.email}</p>
-        <p className="student-bio" style={bioStyle}>{studentData.bio}</p>
+        <p className="student-bio" style={bioStyle}>
+          <span className="quote-mark">“</span>
+          {studentData.bio}
+          <span className="quote-mark">”</span>
+        </p>
+        <div className="student-info-section">
+          <h3 className="section-title" style={sectionTitleStyle}>MAJOR</h3>
+          <p className="section-value" style={sectionValueStyle}>{studentData.major || "N/A"}</p>
+          <h3 className="section-title" style={sectionTitleStyle}>GRADUATING CLASS</h3>
+          <p className="section-value" style={sectionValueStyle}>{studentData.year || "N/A"}</p>
+        </div>
         <div className="social-links">
           <a href={studentData.socialLinks.linkedin} target="_blank" rel="noopener noreferrer" aria-label="LinkedIn" style={socialIconStyle}>
             <svg className="social-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
